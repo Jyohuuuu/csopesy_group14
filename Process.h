@@ -1,7 +1,7 @@
 #pragma once
-#include <memory>
 #include <vector>
 #include <string>
+#include <memory>
 #include "ICommand.h"
 #include "SymbolTable.h"
 
@@ -25,12 +25,13 @@ public:
     SymbolTable& getSymbolTable();
     void setState(ProcessState state);
     int getCommandCounter() const;
-
+    int getTotalCommands() const;
+    
 private:
     int pid;
     std::string name;
     ProcessState currentState;
-    int commandCounter;
     std::vector<std::shared_ptr<ICommand>> commandList;
+    int commandCounter;
     SymbolTable symbolTable;
 };

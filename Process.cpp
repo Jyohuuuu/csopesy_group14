@@ -1,5 +1,5 @@
 #include "Process.h"
-#include <iostream>
+    #include <iostream>
 
 Process::Process(int pid, std::string name) 
     : pid(pid), name(name), currentState(READY), commandCounter(0) {}
@@ -47,4 +47,8 @@ void Process::setState(ProcessState state) {
 
 int Process::getCommandCounter() const {
     return commandCounter;
+}
+
+int Process::getTotalCommands() const {
+    return static_cast<int>(commandList.size());
 }

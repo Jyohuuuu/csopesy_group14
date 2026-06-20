@@ -1,10 +1,10 @@
 #include "Scheduler.h"
+#include "ConsoleSync.h"
 #include <iostream>
 #include <chrono>
-#include <iomanip>
 #include <thread>
 
-Scheduler::Scheduler(int numCores) 
+Scheduler::Scheduler(int numCores)
     : numCores(numCores), running(false), finishedCount(0) {
     runningProcesses.resize(numCores, nullptr);
 }
@@ -23,7 +23,7 @@ void Scheduler::addProcess(std::shared_ptr<Process> process) {
 void Scheduler::start() {
     running = true;
     scheduler = std::thread(&Scheduler::schedulerThread, this);
-    
+
     for (int i = 0; i < numCores; ++i) {
         workers.emplace_back(&Scheduler::workerThread, this, i);
     }
@@ -32,89 +32,100 @@ void Scheduler::start() {
 void Scheduler::stop() {
     running = false;
     cv.notify_all();
-    
-    if (scheduler.joinable()) {
-        scheduler.join();
-    }
-    
+
+    if (scheduler.joinable()) scheduler.join();
+
     for (auto& worker : workers) {
-        if (worker.joinable()) {
-            worker.join();
-        }
+        if (worker.joinable()) worker.join();
     }
 }
 
 void Scheduler::schedulerThread() {
     while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
-}
-
-std::shared_ptr<Process> Scheduler::getNextReadyProcess() {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    if (readyQueue.empty()) {
-        return nullptr;
-    }
-    
-    auto process = readyQueue.front();
-    readyQueue.pop();
-    return process;
 }
 
 void Scheduler::workerThread(int coreId) {
     while (running) {
-        auto process = getNextReadyProcess();
-        
+        std::shared_ptr<Process> process = nullptr;
+
+        {
+            std::unique_lock<std::mutex> lock(queueMutex);
+            cv.wait(lock, [this] { return !readyQueue.empty() || !running; });
+            if (!running) break;
+
+            process = readyQueue.front();
+            readyQueue.pop();
+        }
+
         if (process && !process->isFinished()) {
             process->setState(Process::RUNNING);
+
             {
                 std::lock_guard<std::mutex> lock(processMutex);
-                if (coreId >= 0 && coreId < static_cast<int>(runningProcesses.size())) {
-                    runningProcesses[coreId] = process;
-                }
+                runningProcesses[coreId] = process;
             }
-            
+
             while (!process->isFinished() && running) {
                 process->executeCurrentCommand(coreId);
                 process->moveToNextLine();
-                
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
-            
+
             if (process->isFinished()) {
                 std::lock_guard<std::mutex> lock(processMutex);
                 finishedCount++;
-                if (coreId >= 0 && coreId < static_cast<int>(runningProcesses.size())) {
-                    runningProcesses[coreId] = nullptr;
-                }
+                runningProcesses[coreId] = nullptr;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
 }
 
 bool Scheduler::allProcessesFinished() const {
-    return finishedCount >= static_cast<int>(allProcesses.size()) && !allProcesses.empty();
+    std::lock_guard<std::mutex> lock(processMutex);
+    return !allProcesses.empty() &&
+           finishedCount >= static_cast<int>(allProcesses.size());
 }
 
 void Scheduler::printStatus() const {
-    std::lock_guard<std::mutex> lock(processMutex);
-    
-    std::cout << "\n=== Scheduler Status ===" << std::endl;
-    std::cout << "Total processes: " << allProcesses.size() << std::endl;
-    std::cout << "Finished: " << finishedCount << std::endl;
-    
-    std::cout << "\nRunning processes:" << std::endl;
+    // lock scheduler data first
+    std::lock_guard<std::mutex> pLock(processMutex);
+    std::lock_guard<std::mutex> qLock(queueMutex);
+
+    // then lock shared output mutex so no PrintCommand can interleave
+    std::lock_guard<std::mutex> outLock(g_outputMutex);
+
+    std::cout << "\n----------------------------------------\n";
+    std::cout << "Running processes:\n";
+
+    bool anyRunning = false;
     for (int i = 0; i < numCores; ++i) {
-        if (i < static_cast<int>(runningProcesses.size()) && runningProcesses[i]) {
+        if (runningProcesses[i]) {
             auto p = runningProcesses[i];
-            std::cout << "  Core " << i << ": " << p->getName() 
-                      << " (PID: " << p->getPID() << ")" << std::endl;
-        } else {
-            std::cout << "  Core " << i << ": Idle" << std::endl;
+            std::cout << p->getName()
+                      << "\tCore: " << i
+                      << "\t" << p->getCommandCounter()
+                      << " / " << p->getTotalCommands() << "\n";
+            anyRunning = true;
         }
     }
-    
-    std::cout << "Ready queue size: " << readyQueue.size() << std::endl;
-    std::cout << std::endl;
+    if (!anyRunning) std::cout << "(none)\n";
+
+    std::cout << "\nFinished processes:\n";
+    bool anyFinished = false;
+    for (const auto& p : allProcesses) {
+        if (p && p->isFinished()) {
+            std::cout << p->getName()
+                      << "\tFinished\t"
+                      << p->getTotalCommands() << " / " << p->getTotalCommands() << "\n";
+            anyFinished = true;
+        }
+    }
+    if (!anyFinished) std::cout << "(none)\n";
+
+    std::cout << "\nReady queue size: " << readyQueue.size() << "\n";
+    std::cout << "Total processes: " << allProcesses.size()
+              << " | Finished: " << finishedCount << "\n";
+    std::cout << "----------------------------------------\n";
 }

@@ -22,14 +22,13 @@ public:
 private:
     void schedulerThread();
     void workerThread(int coreId);
-    std::shared_ptr<Process> getNextReadyProcess();
 
     int numCores;
     std::queue<std::shared_ptr<Process>> readyQueue;
     std::vector<std::shared_ptr<Process>> allProcesses;
     std::vector<std::thread> workers;
     std::thread scheduler;
-    
+
     mutable std::mutex queueMutex;
     mutable std::mutex processMutex;
     std::condition_variable cv;
