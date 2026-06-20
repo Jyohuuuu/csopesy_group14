@@ -2,6 +2,10 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <chrono>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
 #include "ICommand.h"
 #include "SymbolTable.h"
 
@@ -27,6 +31,14 @@ public:
     int getCommandCounter() const;
     int getTotalCommands() const;
     
+    // New timestamp methods
+    void markStarted();
+    void markEnded();
+    bool hasStarted() const;
+    bool hasEnded() const;
+    std::string getStartTimeString() const;
+    std::string getEndTimeString() const;
+    
 private:
     int pid;
     std::string name;
@@ -34,4 +46,10 @@ private:
     std::vector<std::shared_ptr<ICommand>> commandList;
     int commandCounter;
     SymbolTable symbolTable;
+    
+    // Timestamp members
+    std::chrono::time_point<std::chrono::system_clock> startTime;
+    std::chrono::time_point<std::chrono::system_clock> endTime;
+    bool started;
+    bool ended;
 };

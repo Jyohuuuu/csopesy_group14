@@ -1,400 +1,100 @@
-[2026-06-20 09:35:36.571] Core 3 | Print command #1 from process08
-[2026-06-20 09:35:36.601] Core 3 | Print command #2 from process08
-[2026-06-20 09:35:36.616] Core 3 | Print command #3 from process08
-[2026-06-20 09:35:36.631] Core 3 | Print command #4 from process08
-[2026-06-20 09:35:36.647] Core 3 | Print command #5 from process08
-[2026-06-20 09:35:36.662] Core 3 | Print command #6 from process08
-[2026-06-20 09:35:36.678] Core 3 | Print command #7 from process08
-[2026-06-20 09:35:36.693] Core 3 | Print command #8 from process08
-[2026-06-20 09:35:36.708] Core 3 | Print command #9 from process08
-[2026-06-20 09:35:36.724] Core 3 | Print command #10 from process08
-[2026-06-20 09:35:36.740] Core 3 | Print command #11 from process08
-[2026-06-20 09:35:36.755] Core 3 | Print command #12 from process08
-[2026-06-20 09:35:36.770] Core 3 | Print command #13 from process08
-[2026-06-20 09:35:36.785] Core 3 | Print command #14 from process08
-[2026-06-20 09:35:36.801] Core 3 | Print command #15 from process08
-[2026-06-20 09:35:36.816] Core 3 | Print command #16 from process08
-[2026-06-20 09:35:36.831] Core 3 | Print command #17 from process08
-[2026-06-20 09:35:36.846] Core 3 | Print command #18 from process08
-[2026-06-20 09:35:36.861] Core 3 | Print command #19 from process08
-[2026-06-20 09:35:36.877] Core 3 | Print command #20 from process08
-[2026-06-20 09:35:36.892] Core 3 | Print command #21 from process08
-[2026-06-20 09:35:36.922] Core 3 | Print command #22 from process08
-[2026-06-20 09:35:36.938] Core 3 | Print command #23 from process08
-[2026-06-20 09:35:36.953] Core 3 | Print command #24 from process08
-[2026-06-20 09:35:36.968] Core 3 | Print command #25 from process08
-[2026-06-20 09:35:36.984] Core 3 | Print command #26 from process08
-[2026-06-20 09:35:37.000] Core 3 | Print command #27 from process08
-[2026-06-20 09:35:37.015] Core 3 | Print command #28 from process08
-[2026-06-20 09:35:37.031] Core 3 | Print command #29 from process08
-[2026-06-20 09:35:37.047] Core 3 | Print command #30 from process08
-[2026-06-20 09:35:37.062] Core 3 | Print command #31 from process08
-[2026-06-20 09:35:37.078] Core 3 | Print command #32 from process08
-[2026-06-20 09:35:37.093] Core 3 | Print command #33 from process08
-[2026-06-20 09:35:37.109] Core 3 | Print command #34 from process08
-[2026-06-20 09:35:37.124] Core 3 | Print command #35 from process08
-[2026-06-20 09:35:37.140] Core 3 | Print command #36 from process08
-[2026-06-20 09:35:37.155] Core 3 | Print command #37 from process08
-[2026-06-20 09:35:37.170] Core 3 | Print command #38 from process08
-[2026-06-20 09:35:37.186] Core 3 | Print command #39 from process08
-[2026-06-20 09:35:37.216] Core 3 | Print command #40 from process08
-[2026-06-20 09:35:37.232] Core 3 | Print command #41 from process08
-[2026-06-20 09:35:37.247] Core 3 | Print command #42 from process08
-[2026-06-20 09:35:37.263] Core 3 | Print command #43 from process08
-[2026-06-20 09:35:37.278] Core 3 | Print command #44 from process08
-[2026-06-20 09:35:37.292] Core 3 | Print command #45 from process08
-[2026-06-20 09:35:37.307] Core 3 | Print command #46 from process08
-[2026-06-20 09:35:37.323] Core 3 | Print command #47 from process08
-[2026-06-20 09:35:37.339] Core 3 | Print command #48 from process08
-[2026-06-20 09:35:37.354] Core 3 | Print command #49 from process08
-[2026-06-20 09:35:37.369] Core 3 | Print command #50 from process08
-[2026-06-20 09:35:37.384] Core 3 | Print command #51 from process08
-[2026-06-20 09:35:37.399] Core 3 | Print command #52 from process08
-[2026-06-20 09:35:37.414] Core 3 | Print command #53 from process08
-[2026-06-20 09:35:37.430] Core 3 | Print command #54 from process08
-[2026-06-20 09:35:37.445] Core 3 | Print command #55 from process08
-[2026-06-20 09:35:37.461] Core 3 | Print command #56 from process08
-[2026-06-20 09:35:37.476] Core 3 | Print command #57 from process08
-[2026-06-20 09:35:37.491] Core 3 | Print command #58 from process08
-[2026-06-20 09:35:37.507] Core 3 | Print command #59 from process08
-[2026-06-20 09:35:37.538] Core 3 | Print command #60 from process08
-[2026-06-20 09:35:37.553] Core 3 | Print command #61 from process08
-[2026-06-20 09:35:37.568] Core 3 | Print command #62 from process08
-[2026-06-20 09:35:37.584] Core 3 | Print command #63 from process08
-[2026-06-20 09:35:37.600] Core 3 | Print command #64 from process08
-[2026-06-20 09:35:37.615] Core 3 | Print command #65 from process08
-[2026-06-20 09:35:37.631] Core 3 | Print command #66 from process08
-[2026-06-20 09:35:37.646] Core 3 | Print command #67 from process08
-[2026-06-20 09:35:37.662] Core 3 | Print command #68 from process08
-[2026-06-20 09:35:37.677] Core 3 | Print command #69 from process08
-[2026-06-20 09:35:37.692] Core 3 | Print command #70 from process08
-[2026-06-20 09:35:37.707] Core 3 | Print command #71 from process08
-[2026-06-20 09:35:37.723] Core 3 | Print command #72 from process08
-[2026-06-20 09:35:37.739] Core 3 | Print command #73 from process08
-[2026-06-20 09:35:37.754] Core 3 | Print command #74 from process08
-[2026-06-20 09:35:37.770] Core 3 | Print command #75 from process08
-[2026-06-20 09:35:37.786] Core 3 | Print command #76 from process08
-[2026-06-20 09:35:37.801] Core 3 | Print command #77 from process08
-[2026-06-20 09:35:37.816] Core 3 | Print command #78 from process08
-[2026-06-20 09:35:37.832] Core 3 | Print command #79 from process08
-[2026-06-20 09:35:37.848] Core 3 | Print command #80 from process08
-[2026-06-20 09:35:37.864] Core 3 | Print command #81 from process08
-[2026-06-20 09:35:37.879] Core 3 | Print command #82 from process08
-[2026-06-20 09:35:37.894] Core 3 | Print command #83 from process08
-[2026-06-20 09:35:37.909] Core 3 | Print command #84 from process08
-[2026-06-20 09:35:37.925] Core 3 | Print command #85 from process08
-[2026-06-20 09:35:37.941] Core 3 | Print command #86 from process08
-[2026-06-20 09:35:37.957] Core 3 | Print command #87 from process08
-[2026-06-20 09:35:37.987] Core 3 | Print command #88 from process08
-[2026-06-20 09:35:38.002] Core 3 | Print command #89 from process08
-[2026-06-20 09:35:38.017] Core 3 | Print command #90 from process08
-[2026-06-20 09:35:38.047] Core 3 | Print command #91 from process08
-[2026-06-20 09:35:38.063] Core 3 | Print command #92 from process08
-[2026-06-20 09:35:38.078] Core 3 | Print command #93 from process08
-[2026-06-20 09:35:38.094] Core 3 | Print command #94 from process08
-[2026-06-20 09:35:38.110] Core 3 | Print command #95 from process08
-[2026-06-20 09:35:38.125] Core 3 | Print command #96 from process08
-[2026-06-20 09:35:38.140] Core 3 | Print command #97 from process08
-[2026-06-20 09:35:38.156] Core 3 | Print command #98 from process08
-[2026-06-20 09:35:38.171] Core 3 | Print command #99 from process08
-[2026-06-20 09:35:38.186] Core 3 | Print command #100 from process08
-[2026-06-20 10:00:00.887] Core 2 | Print command #1 from process08
-[2026-06-20 10:00:00.903] Core 2 | Print command #2 from process08
-[2026-06-20 10:00:00.918] Core 2 | Print command #3 from process08
-[2026-06-20 10:00:00.933] Core 2 | Print command #4 from process08
-[2026-06-20 10:00:00.948] Core 2 | Print command #5 from process08
-[2026-06-20 10:00:00.964] Core 2 | Print command #6 from process08
-[2026-06-20 10:00:00.980] Core 2 | Print command #7 from process08
-[2026-06-20 10:00:00.995] Core 2 | Print command #8 from process08
-[2026-06-20 10:00:01.011] Core 2 | Print command #9 from process08
-[2026-06-20 10:00:01.026] Core 2 | Print command #10 from process08
-[2026-06-20 10:00:01.041] Core 2 | Print command #11 from process08
-[2026-06-20 10:00:01.057] Core 2 | Print command #12 from process08
-[2026-06-20 10:00:01.072] Core 2 | Print command #13 from process08
-[2026-06-20 10:00:01.087] Core 2 | Print command #14 from process08
-[2026-06-20 10:00:01.103] Core 2 | Print command #15 from process08
-[2026-06-20 10:00:01.118] Core 2 | Print command #16 from process08
-[2026-06-20 10:00:01.134] Core 2 | Print command #17 from process08
-[2026-06-20 10:00:01.149] Core 2 | Print command #18 from process08
-[2026-06-20 10:00:01.164] Core 2 | Print command #19 from process08
-[2026-06-20 10:00:01.179] Core 2 | Print command #20 from process08
-[2026-06-20 10:00:01.195] Core 2 | Print command #21 from process08
-[2026-06-20 10:00:01.210] Core 2 | Print command #22 from process08
-[2026-06-20 10:00:01.226] Core 2 | Print command #23 from process08
-[2026-06-20 10:00:01.241] Core 2 | Print command #24 from process08
-[2026-06-20 10:00:01.256] Core 2 | Print command #25 from process08
-[2026-06-20 10:00:01.271] Core 2 | Print command #26 from process08
-[2026-06-20 10:00:01.286] Core 2 | Print command #27 from process08
-[2026-06-20 10:00:01.302] Core 2 | Print command #28 from process08
-[2026-06-20 10:00:01.318] Core 2 | Print command #29 from process08
-[2026-06-20 10:00:01.333] Core 2 | Print command #30 from process08
-[2026-06-20 10:00:01.349] Core 2 | Print command #31 from process08
-[2026-06-20 10:00:01.364] Core 2 | Print command #32 from process08
-[2026-06-20 10:00:01.380] Core 2 | Print command #33 from process08
-[2026-06-20 10:00:01.395] Core 2 | Print command #34 from process08
-[2026-06-20 10:00:01.411] Core 2 | Print command #35 from process08
-[2026-06-20 10:00:01.426] Core 2 | Print command #36 from process08
-[2026-06-20 10:00:01.441] Core 2 | Print command #37 from process08
-[2026-06-20 10:00:01.457] Core 2 | Print command #38 from process08
-[2026-06-20 10:00:01.472] Core 2 | Print command #39 from process08
-[2026-06-20 10:00:01.487] Core 2 | Print command #40 from process08
-[2026-06-20 10:00:01.502] Core 2 | Print command #41 from process08
-[2026-06-20 10:00:01.518] Core 2 | Print command #42 from process08
-[2026-06-20 10:00:01.534] Core 2 | Print command #43 from process08
-[2026-06-20 10:00:01.549] Core 2 | Print command #44 from process08
-[2026-06-20 10:00:01.564] Core 2 | Print command #45 from process08
-[2026-06-20 10:00:01.580] Core 2 | Print command #46 from process08
-[2026-06-20 10:00:01.595] Core 2 | Print command #47 from process08
-[2026-06-20 10:00:01.610] Core 2 | Print command #48 from process08
-[2026-06-20 10:00:01.625] Core 2 | Print command #49 from process08
-[2026-06-20 10:00:01.640] Core 2 | Print command #50 from process08
-[2026-06-20 10:00:01.655] Core 2 | Print command #51 from process08
-[2026-06-20 10:00:01.671] Core 2 | Print command #52 from process08
-[2026-06-20 10:00:01.687] Core 2 | Print command #53 from process08
-[2026-06-20 10:00:01.703] Core 2 | Print command #54 from process08
-[2026-06-20 10:00:01.718] Core 2 | Print command #55 from process08
-[2026-06-20 10:00:01.734] Core 2 | Print command #56 from process08
-[2026-06-20 10:00:01.749] Core 2 | Print command #57 from process08
-[2026-06-20 10:00:01.764] Core 2 | Print command #58 from process08
-[2026-06-20 10:00:01.780] Core 2 | Print command #59 from process08
-[2026-06-20 10:00:01.795] Core 2 | Print command #60 from process08
-[2026-06-20 10:00:01.810] Core 2 | Print command #61 from process08
-[2026-06-20 10:00:01.825] Core 2 | Print command #62 from process08
-[2026-06-20 10:00:01.841] Core 2 | Print command #63 from process08
-[2026-06-20 10:00:01.856] Core 2 | Print command #64 from process08
-[2026-06-20 10:00:01.871] Core 2 | Print command #65 from process08
-[2026-06-20 10:00:01.886] Core 2 | Print command #66 from process08
-[2026-06-20 10:00:01.902] Core 2 | Print command #67 from process08
-[2026-06-20 10:00:01.917] Core 2 | Print command #68 from process08
-[2026-06-20 10:00:01.932] Core 2 | Print command #69 from process08
-[2026-06-20 10:00:01.948] Core 2 | Print command #70 from process08
-[2026-06-20 10:00:01.964] Core 2 | Print command #71 from process08
-[2026-06-20 10:00:01.979] Core 2 | Print command #72 from process08
-[2026-06-20 10:00:01.995] Core 2 | Print command #73 from process08
-[2026-06-20 10:00:02.010] Core 2 | Print command #74 from process08
-[2026-06-20 10:00:02.025] Core 2 | Print command #75 from process08
-[2026-06-20 10:00:02.041] Core 2 | Print command #76 from process08
-[2026-06-20 10:00:02.056] Core 2 | Print command #77 from process08
-[2026-06-20 10:00:02.072] Core 2 | Print command #78 from process08
-[2026-06-20 10:00:02.086] Core 2 | Print command #79 from process08
-[2026-06-20 10:00:02.101] Core 2 | Print command #80 from process08
-[2026-06-20 10:00:02.116] Core 2 | Print command #81 from process08
-[2026-06-20 10:00:02.131] Core 2 | Print command #82 from process08
-[2026-06-20 10:00:02.146] Core 2 | Print command #83 from process08
-[2026-06-20 10:00:02.162] Core 2 | Print command #84 from process08
-[2026-06-20 10:00:02.177] Core 2 | Print command #85 from process08
-[2026-06-20 10:00:02.193] Core 2 | Print command #86 from process08
-[2026-06-20 10:00:02.208] Core 2 | Print command #87 from process08
-[2026-06-20 10:00:02.224] Core 2 | Print command #88 from process08
-[2026-06-20 10:00:02.240] Core 2 | Print command #89 from process08
-[2026-06-20 10:00:02.255] Core 2 | Print command #90 from process08
-[2026-06-20 10:00:02.271] Core 2 | Print command #91 from process08
-[2026-06-20 10:00:02.285] Core 2 | Print command #92 from process08
-[2026-06-20 10:00:02.300] Core 2 | Print command #93 from process08
-[2026-06-20 10:00:02.315] Core 2 | Print command #94 from process08
-[2026-06-20 10:00:02.331] Core 2 | Print command #95 from process08
-[2026-06-20 10:00:02.347] Core 2 | Print command #96 from process08
-[2026-06-20 10:00:02.362] Core 2 | Print command #97 from process08
-[2026-06-20 10:00:02.377] Core 2 | Print command #98 from process08
-[2026-06-20 10:00:02.392] Core 2 | Print command #99 from process08
-[2026-06-20 10:00:02.408] Core 2 | Print command #100 from process08
-[2026-06-20 10:00:26.199] Core 0 | Print command #1 from process08
-[2026-06-20 10:00:26.215] Core 0 | Print command #2 from process08
-[2026-06-20 10:00:26.230] Core 0 | Print command #3 from process08
-[2026-06-20 10:00:26.245] Core 0 | Print command #4 from process08
-[2026-06-20 10:00:26.261] Core 0 | Print command #5 from process08
-[2026-06-20 10:00:26.276] Core 0 | Print command #6 from process08
-[2026-06-20 10:00:26.291] Core 0 | Print command #7 from process08
-[2026-06-20 10:00:26.307] Core 0 | Print command #8 from process08
-[2026-06-20 10:00:26.322] Core 0 | Print command #9 from process08
-[2026-06-20 10:00:26.338] Core 0 | Print command #10 from process08
-[2026-06-20 10:00:26.353] Core 0 | Print command #11 from process08
-[2026-06-20 10:00:26.368] Core 0 | Print command #12 from process08
-[2026-06-20 10:00:26.383] Core 0 | Print command #13 from process08
-[2026-06-20 10:00:26.398] Core 0 | Print command #14 from process08
-[2026-06-20 10:00:26.413] Core 0 | Print command #15 from process08
-[2026-06-20 10:00:26.429] Core 0 | Print command #16 from process08
-[2026-06-20 10:00:26.443] Core 0 | Print command #17 from process08
-[2026-06-20 10:00:26.459] Core 0 | Print command #18 from process08
-[2026-06-20 10:00:26.474] Core 0 | Print command #19 from process08
-[2026-06-20 10:00:26.490] Core 0 | Print command #20 from process08
-[2026-06-20 10:00:26.506] Core 0 | Print command #21 from process08
-[2026-06-20 10:00:26.522] Core 0 | Print command #22 from process08
-[2026-06-20 10:00:26.537] Core 0 | Print command #23 from process08
-[2026-06-20 10:00:26.552] Core 0 | Print command #24 from process08
-[2026-06-20 10:00:26.567] Core 0 | Print command #25 from process08
-[2026-06-20 10:00:26.583] Core 0 | Print command #26 from process08
-[2026-06-20 10:00:26.599] Core 0 | Print command #27 from process08
-[2026-06-20 10:00:26.614] Core 0 | Print command #28 from process08
-[2026-06-20 10:00:26.630] Core 0 | Print command #29 from process08
-[2026-06-20 10:00:26.645] Core 0 | Print command #30 from process08
-[2026-06-20 10:00:26.661] Core 0 | Print command #31 from process08
-[2026-06-20 10:00:26.677] Core 0 | Print command #32 from process08
-[2026-06-20 10:00:26.692] Core 0 | Print command #33 from process08
-[2026-06-20 10:00:26.707] Core 0 | Print command #34 from process08
-[2026-06-20 10:00:26.722] Core 0 | Print command #35 from process08
-[2026-06-20 10:00:26.737] Core 0 | Print command #36 from process08
-[2026-06-20 10:00:26.752] Core 0 | Print command #37 from process08
-[2026-06-20 10:00:26.768] Core 0 | Print command #38 from process08
-[2026-06-20 10:00:26.783] Core 0 | Print command #39 from process08
-[2026-06-20 10:00:26.799] Core 0 | Print command #40 from process08
-[2026-06-20 10:00:26.815] Core 0 | Print command #41 from process08
-[2026-06-20 10:00:26.831] Core 0 | Print command #42 from process08
-[2026-06-20 10:00:26.845] Core 0 | Print command #43 from process08
-[2026-06-20 10:00:26.860] Core 0 | Print command #44 from process08
-[2026-06-20 10:00:26.877] Core 0 | Print command #45 from process08
-[2026-06-20 10:00:26.893] Core 0 | Print command #46 from process08
-[2026-06-20 10:00:26.908] Core 0 | Print command #47 from process08
-[2026-06-20 10:00:26.937] Core 0 | Print command #48 from process08
-[2026-06-20 10:00:26.954] Core 0 | Print command #49 from process08
-[2026-06-20 10:00:26.969] Core 0 | Print command #50 from process08
-[2026-06-20 10:00:26.984] Core 0 | Print command #51 from process08
-[2026-06-20 10:00:26.999] Core 0 | Print command #52 from process08
-[2026-06-20 10:00:27.014] Core 0 | Print command #53 from process08
-[2026-06-20 10:00:27.029] Core 0 | Print command #54 from process08
-[2026-06-20 10:00:27.044] Core 0 | Print command #55 from process08
-[2026-06-20 10:00:27.058] Core 0 | Print command #56 from process08
-[2026-06-20 10:00:27.073] Core 0 | Print command #57 from process08
-[2026-06-20 10:00:27.088] Core 0 | Print command #58 from process08
-[2026-06-20 10:00:27.103] Core 0 | Print command #59 from process08
-[2026-06-20 10:00:27.118] Core 0 | Print command #60 from process08
-[2026-06-20 10:00:27.134] Core 0 | Print command #61 from process08
-[2026-06-20 10:00:27.149] Core 0 | Print command #62 from process08
-[2026-06-20 10:00:27.165] Core 0 | Print command #63 from process08
-[2026-06-20 10:00:27.181] Core 0 | Print command #64 from process08
-[2026-06-20 10:00:27.196] Core 0 | Print command #65 from process08
-[2026-06-20 10:00:27.212] Core 0 | Print command #66 from process08
-[2026-06-20 10:00:27.227] Core 0 | Print command #67 from process08
-[2026-06-20 10:00:27.243] Core 0 | Print command #68 from process08
-[2026-06-20 10:00:27.258] Core 0 | Print command #69 from process08
-[2026-06-20 10:00:27.273] Core 0 | Print command #70 from process08
-[2026-06-20 10:00:27.288] Core 0 | Print command #71 from process08
-[2026-06-20 10:00:27.304] Core 0 | Print command #72 from process08
-[2026-06-20 10:00:27.319] Core 0 | Print command #73 from process08
-[2026-06-20 10:00:27.336] Core 0 | Print command #74 from process08
-[2026-06-20 10:00:27.352] Core 0 | Print command #75 from process08
-[2026-06-20 10:00:27.367] Core 0 | Print command #76 from process08
-[2026-06-20 10:00:27.382] Core 0 | Print command #77 from process08
-[2026-06-20 10:00:27.397] Core 0 | Print command #78 from process08
-[2026-06-20 10:00:27.413] Core 0 | Print command #79 from process08
-[2026-06-20 10:00:27.428] Core 0 | Print command #80 from process08
-[2026-06-20 10:00:27.444] Core 0 | Print command #81 from process08
-[2026-06-20 10:00:27.459] Core 0 | Print command #82 from process08
-[2026-06-20 10:00:27.475] Core 0 | Print command #83 from process08
-[2026-06-20 10:00:27.490] Core 0 | Print command #84 from process08
-[2026-06-20 10:00:27.505] Core 0 | Print command #85 from process08
-[2026-06-20 10:00:27.521] Core 0 | Print command #86 from process08
-[2026-06-20 10:00:27.536] Core 0 | Print command #87 from process08
-[2026-06-20 10:00:27.552] Core 0 | Print command #88 from process08
-[2026-06-20 10:00:27.567] Core 0 | Print command #89 from process08
-[2026-06-20 10:00:27.582] Core 0 | Print command #90 from process08
-[2026-06-20 10:00:27.598] Core 0 | Print command #91 from process08
-[2026-06-20 10:00:27.613] Core 0 | Print command #92 from process08
-[2026-06-20 10:00:27.629] Core 0 | Print command #93 from process08
-[2026-06-20 10:00:27.643] Core 0 | Print command #94 from process08
-[2026-06-20 10:00:27.659] Core 0 | Print command #95 from process08
-[2026-06-20 10:00:27.674] Core 0 | Print command #96 from process08
-[2026-06-20 10:00:27.689] Core 0 | Print command #97 from process08
-[2026-06-20 10:00:27.704] Core 0 | Print command #98 from process08
-[2026-06-20 10:00:27.720] Core 0 | Print command #99 from process08
-[2026-06-20 10:00:27.735] Core 0 | Print command #100 from process08
-[2026-06-20 10:08:23.958] Core 2 | Print command #1 from process08
-[2026-06-20 10:08:23.973] Core 2 | Print command #2 from process08
-[2026-06-20 10:08:23.989] Core 2 | Print command #3 from process08
-[2026-06-20 10:08:24.004] Core 2 | Print command #4 from process08
-[2026-06-20 10:08:24.019] Core 2 | Print command #5 from process08
-[2026-06-20 10:08:24.035] Core 2 | Print command #6 from process08
-[2026-06-20 10:08:24.051] Core 2 | Print command #7 from process08
-[2026-06-20 10:08:24.067] Core 2 | Print command #8 from process08
-[2026-06-20 10:08:24.097] Core 2 | Print command #9 from process08
-[2026-06-20 10:08:24.113] Core 2 | Print command #10 from process08
-[2026-06-20 10:08:24.127] Core 2 | Print command #11 from process08
-[2026-06-20 10:08:24.144] Core 2 | Print command #12 from process08
-[2026-06-20 10:08:24.159] Core 2 | Print command #13 from process08
-[2026-06-20 10:08:24.174] Core 2 | Print command #14 from process08
-[2026-06-20 10:08:24.189] Core 2 | Print command #15 from process08
-[2026-06-20 10:08:24.219] Core 2 | Print command #16 from process08
-[2026-06-20 10:08:24.234] Core 2 | Print command #17 from process08
-[2026-06-20 10:08:24.249] Core 2 | Print command #18 from process08
-[2026-06-20 10:08:24.265] Core 2 | Print command #19 from process08
-[2026-06-20 10:08:24.281] Core 2 | Print command #20 from process08
-[2026-06-20 10:08:24.296] Core 2 | Print command #21 from process08
-[2026-06-20 10:08:24.311] Core 2 | Print command #22 from process08
-[2026-06-20 10:08:24.326] Core 2 | Print command #23 from process08
-[2026-06-20 10:08:24.341] Core 2 | Print command #24 from process08
-[2026-06-20 10:08:24.357] Core 2 | Print command #25 from process08
-[2026-06-20 10:08:24.372] Core 2 | Print command #26 from process08
-[2026-06-20 10:08:24.388] Core 2 | Print command #27 from process08
-[2026-06-20 10:08:24.402] Core 2 | Print command #28 from process08
-[2026-06-20 10:08:24.417] Core 2 | Print command #29 from process08
-[2026-06-20 10:08:24.432] Core 2 | Print command #30 from process08
-[2026-06-20 10:08:24.447] Core 2 | Print command #31 from process08
-[2026-06-20 10:08:24.463] Core 2 | Print command #32 from process08
-[2026-06-20 10:08:24.478] Core 2 | Print command #33 from process08
-[2026-06-20 10:08:24.493] Core 2 | Print command #34 from process08
-[2026-06-20 10:08:24.509] Core 2 | Print command #35 from process08
-[2026-06-20 10:08:24.524] Core 2 | Print command #36 from process08
-[2026-06-20 10:08:24.539] Core 2 | Print command #37 from process08
-[2026-06-20 10:08:24.554] Core 2 | Print command #38 from process08
-[2026-06-20 10:08:24.570] Core 2 | Print command #39 from process08
-[2026-06-20 10:08:24.585] Core 2 | Print command #40 from process08
-[2026-06-20 10:08:24.601] Core 2 | Print command #41 from process08
-[2026-06-20 10:08:24.616] Core 2 | Print command #42 from process08
-[2026-06-20 10:08:24.632] Core 2 | Print command #43 from process08
-[2026-06-20 10:08:24.648] Core 2 | Print command #44 from process08
-[2026-06-20 10:08:24.678] Core 2 | Print command #45 from process08
-[2026-06-20 10:08:24.694] Core 2 | Print command #46 from process08
-[2026-06-20 10:08:24.710] Core 2 | Print command #47 from process08
-[2026-06-20 10:08:24.725] Core 2 | Print command #48 from process08
-[2026-06-20 10:08:24.741] Core 2 | Print command #49 from process08
-[2026-06-20 10:08:24.756] Core 2 | Print command #50 from process08
-[2026-06-20 10:08:24.772] Core 2 | Print command #51 from process08
-[2026-06-20 10:08:24.787] Core 2 | Print command #52 from process08
-[2026-06-20 10:08:24.802] Core 2 | Print command #53 from process08
-[2026-06-20 10:08:24.817] Core 2 | Print command #54 from process08
-[2026-06-20 10:08:24.833] Core 2 | Print command #55 from process08
-[2026-06-20 10:08:24.848] Core 2 | Print command #56 from process08
-[2026-06-20 10:08:24.863] Core 2 | Print command #57 from process08
-[2026-06-20 10:08:24.878] Core 2 | Print command #58 from process08
-[2026-06-20 10:08:24.894] Core 2 | Print command #59 from process08
-[2026-06-20 10:08:24.908] Core 2 | Print command #60 from process08
-[2026-06-20 10:08:24.923] Core 2 | Print command #61 from process08
-[2026-06-20 10:08:24.939] Core 2 | Print command #62 from process08
-[2026-06-20 10:08:24.953] Core 2 | Print command #63 from process08
-[2026-06-20 10:08:24.969] Core 2 | Print command #64 from process08
-[2026-06-20 10:08:24.984] Core 2 | Print command #65 from process08
-[2026-06-20 10:08:24.999] Core 2 | Print command #66 from process08
-[2026-06-20 10:08:25.015] Core 2 | Print command #67 from process08
-[2026-06-20 10:08:25.030] Core 2 | Print command #68 from process08
-[2026-06-20 10:08:25.045] Core 2 | Print command #69 from process08
-[2026-06-20 10:08:25.060] Core 2 | Print command #70 from process08
-[2026-06-20 10:08:25.076] Core 2 | Print command #71 from process08
-[2026-06-20 10:08:25.091] Core 2 | Print command #72 from process08
-[2026-06-20 10:08:25.106] Core 2 | Print command #73 from process08
-[2026-06-20 10:08:25.122] Core 2 | Print command #74 from process08
-[2026-06-20 10:08:25.137] Core 2 | Print command #75 from process08
-[2026-06-20 10:08:25.152] Core 2 | Print command #76 from process08
-[2026-06-20 10:08:25.167] Core 2 | Print command #77 from process08
-[2026-06-20 10:08:25.183] Core 2 | Print command #78 from process08
-[2026-06-20 10:08:25.199] Core 2 | Print command #79 from process08
-[2026-06-20 10:08:25.214] Core 2 | Print command #80 from process08
-[2026-06-20 10:08:25.230] Core 2 | Print command #81 from process08
-[2026-06-20 10:08:25.246] Core 2 | Print command #82 from process08
-[2026-06-20 10:08:25.261] Core 2 | Print command #83 from process08
-[2026-06-20 10:08:25.277] Core 2 | Print command #84 from process08
-[2026-06-20 10:08:25.292] Core 2 | Print command #85 from process08
-[2026-06-20 10:08:25.307] Core 2 | Print command #86 from process08
-[2026-06-20 10:08:25.323] Core 2 | Print command #87 from process08
-[2026-06-20 10:08:25.338] Core 2 | Print command #88 from process08
-[2026-06-20 10:08:25.354] Core 2 | Print command #89 from process08
-[2026-06-20 10:08:25.369] Core 2 | Print command #90 from process08
-[2026-06-20 10:08:25.385] Core 2 | Print command #91 from process08
-[2026-06-20 10:08:25.400] Core 2 | Print command #92 from process08
-[2026-06-20 10:08:25.415] Core 2 | Print command #93 from process08
-[2026-06-20 10:08:25.430] Core 2 | Print command #94 from process08
-[2026-06-20 10:08:25.446] Core 2 | Print command #95 from process08
-[2026-06-20 10:08:25.461] Core 2 | Print command #96 from process08
-[2026-06-20 10:08:25.476] Core 2 | Print command #97 from process08
-[2026-06-20 10:08:25.491] Core 2 | Print command #98 from process08
-[2026-06-20 10:08:25.507] Core 2 | Print command #99 from process08
-[2026-06-20 10:08:25.522] Core 2 | Print command #100 from process08
+(06/20/2026 09:31:35PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:35PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:35PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:35PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:36PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:37PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:38PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:39PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:40PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:41PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:42PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:43PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:44PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:45PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:46PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:46PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:46PM) Core:2 "Hello world from process08!"
+(06/20/2026 09:31:46PM) Core:2 "Hello world from process08!"

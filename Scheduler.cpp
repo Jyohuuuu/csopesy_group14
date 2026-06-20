@@ -60,6 +60,9 @@ void Scheduler::workerThread(int coreId) {
         }
 
         if (process && !process->isFinished()) {
+            // Mark the process as started when it begins execution
+            process->markStarted();  // <-- ADD THIS LINE
+            
             process->setState(Process::RUNNING);
 
             {
@@ -74,6 +77,9 @@ void Scheduler::workerThread(int coreId) {
             }
 
             if (process->isFinished()) {
+                // Mark the process as ended when it finishes
+                process->markEnded();  // <-- ADD THIS LINE
+                
                 std::lock_guard<std::mutex> lock(processMutex);
                 finishedCount++;
                 runningProcesses[coreId] = nullptr;
@@ -97,28 +103,31 @@ void Scheduler::printStatus() const {
     std::lock_guard<std::mutex> outLock(g_outputMutex);
 
     std::cout << "\n----------------------------------------\n";
-    std::cout << "Running processes:\n";
+    std::cout << "Running processes:\n\n";
 
     bool anyRunning = false;
     for (int i = 0; i < numCores; ++i) {
         if (runningProcesses[i]) {
             auto p = runningProcesses[i];
-            std::cout << p->getName()
-                      << "\tCore: " << i
-                      << "\t" << p->getCommandCounter()
+            std::cout << "- " << p->getName() 
+                      << " (" << p->getStartTimeString() << ")  "
+                      << "Core: " << i << "  "
+                      << p->getCommandCounter() 
                       << " / " << p->getTotalCommands() << "\n";
             anyRunning = true;
         }
     }
     if (!anyRunning) std::cout << "(none)\n";
 
-    std::cout << "\nFinished processes:\n";
+    std::cout << "\nFinished processes:\n\n";
     bool anyFinished = false;
     for (const auto& p : allProcesses) {
         if (p && p->isFinished()) {
-            std::cout << p->getName()
-                      << "\tFinished\t"
-                      << p->getTotalCommands() << " / " << p->getTotalCommands() << "\n";
+            std::cout << "- " << p->getName() 
+                      << " (" << p->getStartTimeString() << ")  "
+                      << "Finished  "
+                      << p->getTotalCommands() 
+                      << " / " << p->getTotalCommands() << "\n";
             anyFinished = true;
         }
     }
