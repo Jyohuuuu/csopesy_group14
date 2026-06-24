@@ -31,7 +31,6 @@ public:
     int getCommandCounter() const;
     int getTotalCommands() const;
     
-    // New timestamp methods
     void markStarted();
     void markEnded();
     bool hasStarted() const;
@@ -47,7 +46,6 @@ private:
     int commandCounter;
     SymbolTable symbolTable;
     
-    // Timestamp members
     std::chrono::time_point<std::chrono::system_clock> startTime;
     std::chrono::time_point<std::chrono::system_clock> endTime;
     bool started;
