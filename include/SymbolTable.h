@@ -16,6 +16,11 @@ public:
         return 0;
     }
     
+    // Add this method
+    bool hasValue(const std::string& key) const {
+        return table.find(key) != table.end();
+    }
+    
 private:
     std::unordered_map<std::string, int> table;
 };

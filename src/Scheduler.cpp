@@ -1,7 +1,8 @@
 #include "../include/Scheduler.h"
 #include "../include/ConsoleSync.h"
 #include "../include/PrintCommand.h"
-#include "../include/OSProcess.h"
+#include "../include/FileUtils.h"
+#include "../include/ProcessInstructions.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -31,7 +32,7 @@ Scheduler::~Scheduler() {
     stop();
 }
 
-void Scheduler::addProcess(std::shared_ptr<Process> process) {
+void Scheduler::addProcess(std::shared_ptr<OSProcess> process) {
     std::lock_guard<std::mutex> lock(queueMutex);
     readyQueue.push(process);
     allProcesses.push_back(process);
@@ -91,14 +92,15 @@ void Scheduler::generationThread() {
     static std::uniform_int_distribution<> insCountDist(100, 200);
     
     while (generatingProcesses && running) {
-        // Generate a new process with random instructions
         std::string processName = "p" + std::to_string(pidCounter++);
-        auto process = std::make_shared<Process>(pidCounter, processName);
+        auto process = std::make_shared<OSProcess>(pidCounter, processName);
         
-        int numInstructions = insCountDist(gen);
-        for (int i = 0; i < numInstructions; ++i) {
-            std::string msg = "Hello world from " + processName + "!";
-            process->addCommand(std::make_shared<PrintCommand>(msg, true));
+        std::vector<Instruction> instructions = ProcessGenerator::generateInstructions(
+            minIns.load(), maxIns.load(), processName
+        );
+        
+        for (const auto& instr : instructions) {
+            process->addInstruction(instr);
         }
         
         addProcess(process);
@@ -109,7 +111,7 @@ void Scheduler::generationThread() {
 
 void Scheduler::workerThread(int coreId) {
     while (running) {
-        std::shared_ptr<Process> process = nullptr;
+        std::shared_ptr<OSProcess> process = nullptr;
 
         {
             std::unique_lock<std::mutex> lock(queueMutex);
@@ -122,7 +124,7 @@ void Scheduler::workerThread(int coreId) {
 
         if (process && !process->isFinished()) {
             process->markStarted();
-            process->setState(Process::RUNNING);
+            process->setState(OSProcess::RUNNING);
 
             {
                 std::lock_guard<std::mutex> lock(processMutex);
@@ -132,15 +134,27 @@ void Scheduler::workerThread(int coreId) {
             int quantumCounter = 0;
             
             while (!process->isFinished() && running) {
-                process->executeCurrentCommand(coreId);
+                process->executeNextInstruction(coreId);
                 totalInstructionsExecuted++;
-                process->moveToNextLine();
                 quantumCounter++;
                 
-                // Check for quantum expiration (RR scheduler)
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                if (process->isWaiting()) {
+                    process->setState(OSProcess::READY);
+                    {
+                        std::lock_guard<std::mutex> lock(queueMutex);
+                        readyQueue.push(process);
+                    }
+                    {
+                        std::lock_guard<std::mutex> lock(processMutex);
+                        runningProcesses[coreId] = nullptr;
+                    }
+                    break;
+                }
+                
                 if (schedulerAlgorithm == "rr" && quantumCounter >= quantumCycles) {
                     if (!process->isFinished()) {
-                        process->setState(Process::READY);
+                        process->setState(OSProcess::READY);
                         {
                             std::lock_guard<std::mutex> lock(queueMutex);
                             readyQueue.push(process);
@@ -153,7 +167,6 @@ void Scheduler::workerThread(int coreId) {
                     }
                 }
                 
-                // Delay if specified
                 if (delayPerExec > 0) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(delayPerExec));
                 }
@@ -177,7 +190,7 @@ bool Scheduler::allProcessesFinished() const {
            finishedCount >= static_cast<int>(allProcesses.size());
 }
 
-std::shared_ptr<Process> Scheduler::findProcessByName(const std::string& name) const {
+std::shared_ptr<OSProcess> Scheduler::findProcessByName(const std::string& name) const {
     std::lock_guard<std::mutex> lock(processMutex);
     for (const auto& p : allProcesses) {
         if (p && p->getName() == name) {
@@ -321,11 +334,10 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     
     file.close();
     std::cout << "Report saved to: " << reportPath << "\n";
-    
 }
 
-
-void Scheduler::executeInstruction(std::shared_ptr<Process> /*process*/, int /*coreId*/) {
+void Scheduler::executeInstruction(std::shared_ptr<OSProcess> /*process*/, int /*coreId*/) {
+    // Placeholder - actual execution happens in workerThread
 }
 
 std::string Scheduler::getCurrentTimeString() const {

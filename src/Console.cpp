@@ -78,7 +78,7 @@ void Console::run() {
 void Console::printMainMenu() {
     std::lock_guard<std::mutex> lock(g_outputMutex);
     std::cout << "\n========================================\n";
-    std::cout << "  OS Emulator v1.0\n";
+    std::cout << "  OS Emulator v1.02  Last Updated: 2026-6-24\n";
     std::cout << "========================================\n";
     std::cout << "Commands:\n";
     std::cout << "  initialize      - Load config.txt\n";
@@ -123,14 +123,29 @@ void Console::handleScreenCreate(const std::string& name) {
         std::cout << "Please run 'initialize' first\n";
         return;
     }
-    static int pidCounter = 1000;
-    auto process = std::make_shared<Process>(pidCounter++, name);
-    for (int i = 0; i < 50; i++) {
-        std::string msg = "Hello world from " + name + "!";
-        process->addCommand(std::make_shared<PrintCommand>(msg, true));
+    
+    if (name.empty()) {
+        std::cout << "Usage: screen -s <process_name>\n";
+        return;
     }
+    
+    static int pidCounter = 1000;
+    auto process = std::make_shared<OSProcess>(pidCounter++, name);
+    
+    std::vector<Instruction> instructions = ProcessGenerator::generateInstructions(
+        scheduler->getMinIns(), 
+        scheduler->getMaxIns(), 
+        name
+    );
+    
+    for (const auto& instr : instructions) {
+        process->addInstruction(instr);
+    }
+    
     scheduler->addProcess(process);
     std::cout << "Process " << name << " created with PID " << process->getPID() << "\n";
+    std::cout << "Instructions: " << instructions.size() << "\n";
+    std::cout << "Use 'screen -r " << name << "' to attach\n";
 }
 
 void Console::handleScreenAttach(const std::string& name) {
@@ -158,18 +173,39 @@ void Console::processScreenCommand(const std::string& command) {
     if (command == "process-smi") {
         auto process = scheduler->findProcessByName(currentScreenProcess);
         if (process) {
-            std::cout << "Process: " << process->getName() << "\n";
+            std::cout << "\n========================================\n";
+            std::cout << "  PROCESS INFORMATION\n";
+            std::cout << "========================================\n";
+            std::cout << "Process Name: " << process->getName() << "\n";
             std::cout << "PID: " << process->getPID() << "\n";
             std::cout << "State: ";
             if (process->isFinished()) {
                 std::cout << "FINISHED\n";
                 std::cout << "Ended: " << process->getEndTimeString() << "\n";
+            } else if (process->isWaiting()) {
+                std::cout << "SLEEPING (" << process->getWaitTicks() << " ticks remaining)\n";
             } else {
                 std::cout << "RUNNING\n";
             }
             std::cout << "Instructions: " << process->getCommandCounter() 
                       << " / " << process->getTotalCommands() << "\n";
             std::cout << "Started: " << process->getStartTimeString() << "\n";
+            
+            std::cout << "\nProcess Logs (PRINT outputs):\n";
+            std::cout << "----------------------------------------\n";
+            const auto& logs = process->getOutputLogs();
+            if (logs.empty()) {
+                std::cout << "(No PRINT outputs yet)\n";
+            } else {
+                for (const auto& log : logs) {
+                    std::cout << "  " << log << "\n";
+                }
+            }
+            std::cout << "========================================\n\n";
+        } else {
+            std::cout << "Process " << currentScreenProcess << " not found\n";
+            inScreenSession = false;
+            currentScreenProcess = "";
         }
     }
     else if (command == "exit") {

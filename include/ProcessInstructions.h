@@ -1,8 +1,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <functional>
+#include <cstdint>
 #include <random>
+#include <iostream>
 
 enum class InstructionType {
     PRINT,
@@ -16,21 +17,26 @@ enum class InstructionType {
 struct Instruction {
     InstructionType type;
     std::vector<std::string> params;
-    std::vector<Instruction> nestedInstructions; // For FOR loops
+    std::vector<Instruction> nestedInstructions;
     int repeatCount = 0;
+    
+    Instruction() = default;
+    Instruction(InstructionType t, const std::vector<std::string>& p = {}) 
+        : type(t), params(p) {}
 };
 
 class ProcessGenerator {
 public:
-    static std::vector<Instruction> generateInstructions(int minCount, int maxCount) {
+    static std::vector<Instruction> generateInstructions(int minCount, int maxCount, const std::string& processName) {
         static std::random_device rd;
         static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<> countDist(minCount, maxCount);
         static std::uniform_int_distribution<> typeDist(0, 5);
         static std::uniform_int_distribution<> varDist(0, 9);
         static std::uniform_int_distribution<> valueDist(1, 100);
         static std::uniform_int_distribution<> sleepDist(1, 10);
+        static std::uniform_int_distribution<> forNestedDist(1, 3);
         
+        std::uniform_int_distribution<> countDist(minCount, maxCount);
         int instructionCount = countDist(gen);
         std::vector<Instruction> instructions;
         
@@ -41,37 +47,66 @@ public:
             switch(type) {
                 case 0: // PRINT
                     inst.type = InstructionType::PRINT;
-                    inst.params.push_back("Hello world from " + getProcessName());
+                    // Format: "Hello world from <process_name>!"
+                    inst.params.push_back("Hello world from " + processName + "!");
                     break;
+                    
                 case 1: // DECLARE
                     inst.type = InstructionType::DECLARE;
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
-                    inst.params.push_back(std::to_string(valueDist(gen)));
+                    inst.params.push_back(std::to_string(valueDist(gen) % 100));
                     break;
+                    
                 case 2: // ADD
                     inst.type = InstructionType::ADD;
-                    inst.params.push_back("var" + std::to_string(varDist(gen)));
-                    inst.params.push_back("var" + std::to_string(varDist(gen)));
-                    inst.params.push_back(std::to_string(valueDist(gen)));
+                    inst.params.push_back("var" + std::to_string(varDist(gen))); // dest
+                    inst.params.push_back("var" + std::to_string(varDist(gen))); // src1
+                    inst.params.push_back(std::to_string(valueDist(gen) % 50));   // src2 (value)
                     break;
+                    
                 case 3: // SUBTRACT
                     inst.type = InstructionType::SUBTRACT;
-                    inst.params.push_back("var" + std::to_string(varDist(gen)));
-                    inst.params.push_back("var" + std::to_string(varDist(gen)));
-                    inst.params.push_back(std::to_string(valueDist(gen)));
+                    inst.params.push_back("var" + std::to_string(varDist(gen))); // dest
+                    inst.params.push_back("var" + std::to_string(varDist(gen))); // src1
+                    inst.params.push_back(std::to_string(valueDist(gen) % 50));   // src2 (value)
                     break;
+                    
                 case 4: // SLEEP
                     inst.type = InstructionType::SLEEP;
                     inst.params.push_back(std::to_string(sleepDist(gen)));
                     break;
-                case 5: // FOR loop
+                    
+                case 5: // FOR
                     inst.type = InstructionType::FOR;
                     inst.repeatCount = valueDist(gen) % 5 + 1;
-                    int nestedCount = valueDist(gen) % 3 + 1;
+                    
+                    int nestedCount = forNestedDist(gen);
                     for (int j = 0; j < nestedCount; ++j) {
                         Instruction nested;
-                        nested.type = InstructionType::PRINT;
-                        nested.params.push_back("Loop iteration " + std::to_string(j + 1));
+                        int nestedType = typeDist(gen) % 4;
+                        switch(nestedType) {
+                            case 0:
+                                nested.type = InstructionType::PRINT;
+                                nested.params.push_back("Loop " + std::to_string(j+1) + " from " + processName);
+                                break;
+                            case 1:
+                                nested.type = InstructionType::DECLARE;
+                                nested.params.push_back("loopVar" + std::to_string(j));
+                                nested.params.push_back(std::to_string(valueDist(gen) % 50));
+                                break;
+                            case 2:
+                                nested.type = InstructionType::ADD;
+                                nested.params.push_back("loopVar" + std::to_string(j));
+                                nested.params.push_back("loopVar" + std::to_string(j));
+                                nested.params.push_back(std::to_string(valueDist(gen) % 20));
+                                break;
+                            case 3:
+                                nested.type = InstructionType::SUBTRACT;
+                                nested.params.push_back("loopVar" + std::to_string(j));
+                                nested.params.push_back("loopVar" + std::to_string(j));
+                                nested.params.push_back(std::to_string(valueDist(gen) % 20));
+                                break;
+                        }
                         inst.nestedInstructions.push_back(nested);
                     }
                     break;
@@ -79,11 +114,5 @@ public:
             instructions.push_back(inst);
         }
         return instructions;
-    }
-    
-private:
-    static std::string getProcessName() {
-        static int counter = 0;
-        return "p" + std::to_string(++counter);
     }
 };

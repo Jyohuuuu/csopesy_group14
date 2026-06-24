@@ -6,10 +6,13 @@
 #include <iomanip>
 #include <sstream>
 #include <ctime>
-#include "ICommand.h"
+#include <unordered_map>
+#include <cstdint>
+#include <stack>
 #include "SymbolTable.h"
+#include "ProcessInstructions.h"
 
-class Process {
+class OSProcess {
 public:
     enum ProcessState {
         READY,
@@ -18,18 +21,20 @@ public:
         FINISHED
     };
 
-    Process(int pid, std::string name);
-    void addCommand(std::shared_ptr<ICommand> command);
-    void executeCurrentCommand(int coreId);
-    void moveToNextLine();
+    OSProcess(int pid, std::string name);
+    
+    void addInstruction(const Instruction& instruction);
+    void executeNextInstruction(int coreId);
     bool isFinished() const;
+    
     int getPID() const;
     ProcessState getState() const;
     std::string getName() const;
     SymbolTable& getSymbolTable();
-    void setState(ProcessState state);
     int getCommandCounter() const;
     int getTotalCommands() const;
+    
+    void setState(ProcessState state);
     
     void markStarted();
     void markEnded();
@@ -38,16 +43,50 @@ public:
     std::string getStartTimeString() const;
     std::string getEndTimeString() const;
     
+    void setWaitTicks(int ticks);
+    void decrementWaitTicks();
+    bool isWaiting() const;
+    int getWaitTicks() const;
+    
+    const std::vector<std::string>& getOutputLogs() const { return outputLogs; }
+    void addOutputLog(const std::string& log) { outputLogs.push_back(log); }
+    
 private:
+    void executePrint(const Instruction& instr);
+    void executeDeclare(const Instruction& instr);
+    void executeAdd(const Instruction& instr);
+    void executeSubtract(const Instruction& instr);
+    void executeSleep(const Instruction& instr);
+    void executeFor(const Instruction& instr);
+    
+    uint16_t getVariableValue(const std::string& name);
+    void setVariableValue(const std::string& name, uint16_t value);
+    bool isVariable(const std::string& token);
+    uint16_t parseValue(const std::string& token);
+    
     int pid;
     std::string name;
     ProcessState currentState;
-    std::vector<std::shared_ptr<ICommand>> commandList;
-    int commandCounter;
+    std::vector<Instruction> instructionList;
+    int instructionCounter;
     SymbolTable symbolTable;
+    
+    struct ForLoopState {
+        int startIndex;
+        int endIndex;
+        int currentIteration;
+        int maxIterations;
+    };
+    std::stack<ForLoopState> forLoopStack;
+    bool insideForLoop;
+    
+    int waitTicks;
+    bool isWaitingState;
     
     std::chrono::time_point<std::chrono::system_clock> startTime;
     std::chrono::time_point<std::chrono::system_clock> endTime;
     bool started;
     bool ended;
+    
+    std::vector<std::string> outputLogs;
 };
