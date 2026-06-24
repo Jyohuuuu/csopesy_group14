@@ -1,0 +1,66 @@
+========================================
+  CPU UTILIZATION REPORT
+  Generated: 2026-06-24 14:58:58
+========================================
+CPU Utilization: 0%
+Cores Used: 3 | Cores Available: 4
+
+Running processes:
+(none)
+
+Finished processes:
+- p1000 (Started: 06/24/2026 02:58:40PM)  Finished  153 / 153
+- p1001 (Started: 06/24/2026 02:58:40PM)  Finished  164 / 164
+- p1002 (Started: 06/24/2026 02:58:40PM)  Finished  133 / 133
+- p1003 (Started: 06/24/2026 02:58:40PM)  Finished  176 / 176
+- p1004 (Started: 06/24/2026 02:58:40PM)  Finished  184 / 184
+- p1005 (Started: 06/24/2026 02:58:40PM)  Finished  106 / 106
+- p1006 (Started: 06/24/2026 02:58:40PM)  Finished  157 / 157
+- p1007 (Started: 06/24/2026 02:58:40PM)  Finished  130 / 130
+- p1008 (Started: 06/24/2026 02:58:40PM)  Finished  161 / 161
+- p1009 (Started: 06/24/2026 02:58:41PM)  Finished  138 / 138
+- p1010 (Started: 06/24/2026 02:58:41PM)  Finished  183 / 183
+- p1011 (Started: 06/24/2026 02:58:41PM)  Finished  189 / 189
+- p1012 (Started: 06/24/2026 02:58:41PM)  Finished  128 / 128
+- p1013 (Started: 06/24/2026 02:58:41PM)  Finished  169 / 169
+- p1014 (Started: 06/24/2026 02:58:41PM)  Finished  160 / 160
+- p1015 (Started: 06/24/2026 02:58:41PM)  Finished  174 / 174
+- p1016 (Started: 06/24/2026 02:58:41PM)  Finished  155 / 155
+- p1017 (Started: 06/24/2026 02:58:41PM)  Finished  195 / 195
+- p1018 (Started: 06/24/2026 02:58:42PM)  Finished  185 / 185
+- p1019 (Started: 06/24/2026 02:58:42PM)  Finished  141 / 141
+- p1020 (Started: 06/24/2026 02:58:42PM)  Finished  189 / 189
+- p1021 (Started: 06/24/2026 02:58:42PM)  Finished  158 / 158
+- p1022 (Started: 06/24/2026 02:58:42PM)  Finished  139 / 139
+- p1023 (Started: 06/24/2026 02:58:42PM)  Finished  199 / 199
+- p1024 (Started: 06/24/2026 02:58:42PM)  Finished  142 / 142
+- p1025 (Started: 06/24/2026 02:58:42PM)  Finished  151 / 151
+- p1026 (Started: 06/24/2026 02:58:42PM)  Finished  116 / 116
+- p1027 (Started: 06/24/2026 02:58:43PM)  Finished  182 / 182
+- p1028 (Started: 06/24/2026 02:58:43PM)  Finished  162 / 162
+- p1029 (Started: 06/24/2026 02:58:43PM)  Finished  142 / 142
+- p1030 (Started: 06/24/2026 02:58:43PM)  Finished  125 / 125
+- p1031 (Started: 06/24/2026 02:58:43PM)  Finished  170 / 170
+- p1032 (Started: 06/24/2026 02:58:43PM)  Finished  194 / 194
+- p1033 (Started: 06/24/2026 02:58:43PM)  Finished  111 / 111
+- p1034 (Started: 06/24/2026 02:58:43PM)  Finished  173 / 173
+- p1035 (Started: 06/24/2026 02:58:43PM)  Finished  113 / 113
+- p1036 (Started: 06/24/2026 02:58:44PM)  Finished  130 / 130
+- p1037 (Started: 06/24/2026 02:58:44PM)  Finished  148 / 148
+- p1038 (Started: 06/24/2026 02:58:44PM)  Finished  145 / 145
+- p1039 (Started: 06/24/2026 02:58:44PM)  Finished  106 / 106
+- p1040 (Started: 06/24/2026 02:58:44PM)  Finished  148 / 148
+- p1041 (Started: 06/24/2026 02:58:44PM)  Finished  158 / 158
+- p1042 (Started: 06/24/2026 02:58:44PM)  Finished  127 / 127
+- p1043 (Started: 06/24/2026 02:58:44PM)  Finished  133 / 133
+- p1044 (Started: 06/24/2026 02:58:44PM)  Finished  124 / 124
+- p1045 (Started: 06/24/2026 02:58:45PM)  Finished  113 / 113
+- p1046 (Started: 06/24/2026 02:58:45PM)  Finished  121 / 121
+- p1047 (Started: 06/24/2026 02:58:45PM)  Finished  138 / 138
+- p1048 (Started: 06/24/2026 02:58:45PM)  Finished  171 / 171
+- p1049 (Started: 06/24/2026 02:58:45PM)  Finished  148 / 148
+
+Ready queue size: 0
+Total processes: 50 | Finished: 50
+Instructions executed: 7557
+========================================

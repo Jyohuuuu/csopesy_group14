@@ -1,4 +1,6 @@
 @echo off
+setlocal enabledelayedexpansion
+
 echo ========================================
 echo   OS Emulator - Build Script
 echo ========================================
@@ -8,7 +10,6 @@ REM Check for g++
 where g++ >nul 2>nul
 if %errorlevel% neq 0 (
     echo ERROR: g++ not found! Please install MinGW.
-    echo Download from: https://www.mingw-w64.org/
     pause
     exit /b 1
 )
@@ -25,22 +26,21 @@ if not exist config.txt (
         echo max-ins 2000
         echo delay-per-exec 0
     ) > config.txt
-    echo config.txt created.
 )
 
-echo.
 echo Compiling...
 echo.
 
-REM Compile all needed source files
-g++ -std=c++17 -Wall -Wextra -O2 ^
-    main_mco1.cpp ^
-    Console.cpp ^
-    Scheduler.cpp ^
-    Process.cpp ^
-    PrintCommand.cpp ^
-    -o OSEmulator.exe ^
-    -lpthread
+REM Compile and capture ONLY errors (not warnings) to a file
+g++ -std=c++17 -Wall -Wextra -O2 -D_GNU_SOURCE ^
+    src/main_mco1.cpp ^
+    src/Console.cpp ^
+    src/Scheduler.cpp ^
+    src/Process.cpp ^
+    src/PrintCommand.cpp ^
+    -Iinclude ^
+    -o build/OSEmulator.exe ^
+    -pthread 2> build_errors.txt
 
 if %errorlevel% neq 0 (
     echo.
@@ -48,17 +48,14 @@ if %errorlevel% neq 0 (
     echo   ERROR: Compilation failed!
     echo ========================================
     echo.
-    echo Required source files:
-    echo   - main_mco1.cpp
-    echo   - Console.cpp
-    echo   - Scheduler.cpp
-    echo   - Process.cpp
-    echo   - PrintCommand.cpp
+    echo Error log saved to: build_errors.txt
     echo.
-    echo Required headers:
-    echo   - Console.h, Scheduler.h, Process.h
-    echo   - PrintCommand.h, ICommand.h, Config.h
-    echo   - FileUtils.h, SymbolTable.h, ConsoleSync.h
+    echo First 20 errors:
+    echo ----------------------------------------
+    type build_errors.txt | findstr /C:"error:" | head -n 20
+    echo.
+    echo To see full errors, open build_errors.txt
+    echo.
     pause
     exit /b 1
 )
@@ -69,24 +66,12 @@ echo   Compilation Successful!
 echo ========================================
 echo.
 
-REM Create required folders before running
-if not exist process_logs (
-    echo Creating process_logs folder...
-    mkdir process_logs
-)
-if not exist reports (
-    echo Creating reports folder...
-    mkdir reports
-)
+if not exist process_logs mkdir process_logs
+if not exist reports mkdir reports
 
-echo.
 echo Running OSEmulator.exe...
 echo ========================================
 echo.
-OSEmulator.exe
+build\OSEmulator.exe
 
-echo.
-echo ========================================
-echo   Emulator finished
-echo ========================================
 pause
