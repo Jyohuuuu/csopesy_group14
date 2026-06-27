@@ -59,16 +59,16 @@ public:
                     
                 case 2: // ADD
                     inst.type = InstructionType::ADD;
-                    inst.params.push_back("var" + std::to_string(varDist(gen))); // dest
-                    inst.params.push_back("var" + std::to_string(varDist(gen))); // src1
-                    inst.params.push_back(std::to_string(valueDist(gen) % 50));   // src2 (value)
+                    inst.params.push_back("var" + std::to_string(varDist(gen)));
+                    inst.params.push_back("var" + std::to_string(varDist(gen)));
+                    inst.params.push_back(std::to_string(valueDist(gen) % 50));
                     break;
                     
                 case 3: // SUBTRACT
                     inst.type = InstructionType::SUBTRACT;
-                    inst.params.push_back("var" + std::to_string(varDist(gen))); // dest
-                    inst.params.push_back("var" + std::to_string(varDist(gen))); // src1
-                    inst.params.push_back(std::to_string(valueDist(gen) % 50));   // src2 (value)
+                    inst.params.push_back("var" + std::to_string(varDist(gen)));
+                    inst.params.push_back("var" + std::to_string(varDist(gen)));
+                    inst.params.push_back(std::to_string(valueDist(gen) % 50));
                     break;
                     
                 case 4: // SLEEP

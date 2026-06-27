@@ -149,6 +149,7 @@ void Scheduler::workerThread(int coreId) {
                     {
                         std::lock_guard<std::mutex> lock(queueMutex);
                         readyQueue.push(process);
+                        cv.notify_one();
                     }
                     {
                         std::lock_guard<std::mutex> lock(processMutex);
@@ -163,6 +164,7 @@ void Scheduler::workerThread(int coreId) {
                         {
                             std::lock_guard<std::mutex> lock(queueMutex);
                             readyQueue.push(process);
+                            cv.notify_one();
                         }
                         {
                             std::lock_guard<std::mutex> lock(processMutex);
