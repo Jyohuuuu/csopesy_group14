@@ -250,7 +250,7 @@ void Scheduler::printStatus() const {
 
     std::cout << "\n----------------------------------------\n";
     std::cout << "CPU Utilization: " << cpuUtil << "%\n";
-    std::cout << "Cores Used: " << busyCores << " | Cores Available: " << numCores << "\n\n";
+    std::cout << "Cores Used: " << busyCores << " | Cores Available: " << (numCores - busyCores) << "\n\n";
     
     std::cout << "Running processes:\n";
     bool anyRunning = false;
@@ -292,7 +292,7 @@ void Scheduler::printUtilizationReport() const {
     printStatus();
 }
 
-void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
+void Scheduler::saveUtilizationReport(const std::string&) const {
     std::lock_guard<std::mutex> pLock(processMutex);
     std::lock_guard<std::mutex> qLock(queueMutex);
     
@@ -316,7 +316,7 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     float cpuUtil = (static_cast<float>(busyCores) / numCores) * 100.0f;
 
     file << "CPU Utilization: " << cpuUtil << "%\n";
-    file << "Cores Used: " << numCores - 1 << " | Cores Available: " << numCores << "\n\n";
+    file << "Cores Used: " << busyCores << " | Cores Available: " << (numCores - busyCores) << "\n\n";
     
     file << "Running processes:\n";
     bool anyRunning = false;
@@ -357,7 +357,7 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     std::cout << "Report saved to: " << reportPath << "\n";
 }
 
-void Scheduler::executeInstruction(std::shared_ptr<OSProcess> /*process*/, int /*coreId*/) {
+void Scheduler::executeInstruction(std::shared_ptr<OSProcess>, int) {
     // Placeholder - actual execution happens in workerThread
 }
 
