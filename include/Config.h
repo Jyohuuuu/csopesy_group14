@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+#include <climits>
 
 struct Config {
     int numCpu = 4;
@@ -32,7 +33,6 @@ struct Config {
                         schedulerType.front() == '"' && schedulerType.back() == '"') {
                         schedulerType = schedulerType.substr(1, schedulerType.length() - 2);
                     }
-
                     std::transform(schedulerType.begin(), schedulerType.end(), schedulerType.begin(),
                                    [](unsigned char c) { return std::tolower(c); });
                     scheduler = schedulerType;
@@ -46,12 +46,36 @@ struct Config {
         }
         
         file.close();
-
+        
         if (scheduler != "fcfs" && scheduler != "rr") {
             std::cerr << "Warning: unknown scheduler \"" << scheduler
                        << "\" in config.txt (expected \"fcfs\" or \"rr\"). "
                        << "Defaulting to \"fcfs\".\n";
             scheduler = "fcfs";
+        }
+        
+
+        auto clamp = [](int& value, int lo, int hi, const char* name) {
+            if (value < lo || value > hi) {
+                std::cerr << "Warning: \"" << name << "\" value " << value
+                           << " is out of range [" << lo << ", " << hi
+                           << "]. Clamping.\n";
+                if (value < lo) value = lo;
+                if (value > hi) value = hi;
+            }
+        };
+        
+        clamp(numCpu, 1, 128, "num-cpu");
+        clamp(quantumCycles, 1, INT_MAX, "quantum-cycles");
+        clamp(batchProcessFreq, 1, INT_MAX, "batch-process-freq");
+        clamp(minIns, 1, INT_MAX, "min-ins");
+        clamp(maxIns, 1, INT_MAX, "max-ins");
+        clamp(delayPerExec, 0, INT_MAX, "delay-per-exec");
+        
+        if (minIns > maxIns) {
+            std::cerr << "Warning: min-ins (" << minIns << ") > max-ins (" << maxIns
+                       << "). Swapping them.\n";
+            std::swap(minIns, maxIns);
         }
         
         return true;
