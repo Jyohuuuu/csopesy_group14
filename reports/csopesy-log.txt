@@ -1,0 +1,20 @@
+========================================
+  CPU UTILIZATION REPORT
+  Generated: 2026-06-27 17:35:50
+========================================
+CPU Utilization: 100%
+Cores Used: 3 | Cores Available: 4
+
+Running processes:
+- p1018 (Started: 06/27/2026 05:35:50PM)  Core: 0  70 / 1023
+- p1006 (Started: 06/27/2026 05:35:50PM)  Core: 1  103 / 1022
+- p1028 (Started: 06/27/2026 05:35:50PM)  Core: 2  99 / 1022
+- p1019 (Started: 06/27/2026 05:35:50PM)  Core: 3  90 / 1020
+
+Finished processes:
+(none)
+
+Ready queue size: 27
+Total processes: 31 | Finished: 0
+Instructions executed: 7333
+========================================

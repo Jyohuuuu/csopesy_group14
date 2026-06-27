@@ -69,7 +69,4 @@ echo.
 if not exist process_logs mkdir process_logs
 if not exist reports mkdir reports
 
-echo Running OSEmulator.exe...
-echo ========================================
-echo.
-OSEmulator.exe
+echo Build complete. Run OSEmulator.exe manually when ready.
