@@ -171,7 +171,6 @@ void Scheduler::workerThread(int coreId) {
                         break;
                     }
                 } else if (schedulerAlgorithm == "fcfs") {
-                    // FCFS: no preemption, continue until finished or waiting
                 }
                 
                 if (delayPerExec > 0) {
@@ -251,7 +250,7 @@ void Scheduler::printStatus() const {
 
     std::cout << "\n----------------------------------------\n";
     std::cout << "CPU Utilization: " << cpuUtil << "%\n";
-    std::cout << "Cores Used: " << numCores - 1 << " | Cores Available: " << numCores << "\n\n";
+    std::cout << "Cores Used: " << busyCores << " | Cores Available: " << numCores << "\n\n";
     
     std::cout << "Running processes:\n";
     bool anyRunning = false;
