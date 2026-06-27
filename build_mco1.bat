@@ -39,7 +39,7 @@ g++ -std=c++17 -Wall -Wextra -O2 -D_GNU_SOURCE ^
     src/Process.cpp ^
     src/PrintCommand.cpp ^
     -Iinclude ^
-    -o build/OSEmulator.exe ^
+    -o OSEmulator.exe ^
     -pthread 2> build_errors.txt
 
 if %errorlevel% neq 0 (
@@ -72,6 +72,4 @@ if not exist reports mkdir reports
 echo Running OSEmulator.exe...
 echo ========================================
 echo.
-build\OSEmulator.exe
-
-pause
+OSEmulator.exe

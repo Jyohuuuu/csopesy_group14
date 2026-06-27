@@ -41,6 +41,9 @@ public:
 
     int getMinIns() const { return minIns.load(); }
     int getMaxIns() const { return maxIns.load(); }
+
+    std::mutex& getProcessMutex() { return processMutex; }
+
     
 private:
     void schedulerThread();

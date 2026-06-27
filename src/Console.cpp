@@ -4,12 +4,15 @@
 #include "../include/PrintCommand.h"
 #include "../include/ConsoleSync.h"
 #include "../include/FileUtils.h"
+#include "../include/ProcessInstructions.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
 #include <cctype>
 #include <random>
+#include <chrono>
+#include <thread>
 
 Console::Console() : initialized(false), inScreenSession(false) {}
 Console::~Console() {}
@@ -19,10 +22,16 @@ void Console::run() {
     printMainMenu();
     
     while (true) {
-        if (!inScreenSession) {
+        if (inScreenSession) {
+            std::cout << currentScreenProcess << "> ";
+        } else {
             std::cout << "\n> ";
         }
-        std::getline(std::cin, command);
+        std::cout.flush();
+        
+        if (!std::getline(std::cin, command)) {
+            break;
+        }
         
         if (inScreenSession) {
             processScreenCommand(command);
@@ -153,68 +162,117 @@ void Console::handleScreenAttach(const std::string& name) {
         std::cout << "Please run 'initialize' first\n";
         return;
     }
-    auto process = scheduler->findProcessByName(name);
-    if (process && !process->isFinished()) {
-        inScreenSession = true;
-        currentScreenProcess = name;
-        runScreenSession(name);
+    
+    if (!scheduler) {
+        std::cout << "Scheduler not initialized\n";
+        return;
     }
-    else {
-        std::cout << "Process " << name << " not found or already finished\n";
+    
+    // Get a copy of the process with proper locking
+    std::shared_ptr<OSProcess> process = scheduler->findProcessByName(name);
+    
+    if (process) {
+        // Check if finished (lock is released, but shared_ptr keeps process alive)
+        if (!process->isFinished()) {
+            inScreenSession = true;
+            currentScreenProcess = name;
+            std::cout << "\n=== Attached to " << name << " ===\n";
+            std::cout << "Commands: process-smi, exit\n";
+            std::cout << "Type 'exit' to detach from process\n\n";
+        } else {
+            std::cout << "Process " << name << " has already finished\n";
+        }
+    } else {
+        std::cout << "Process " << name << " not found\n";
     }
-}
-
-void Console::runScreenSession(const std::string& name) {
-    std::cout << "\n=== Attached to " << name << " ===\n";
-    std::cout << "Commands: process-smi, exit\n\n";
 }
 
 void Console::processScreenCommand(const std::string& command) {
-    if (command == "process-smi") {
-        auto process = scheduler->findProcessByName(currentScreenProcess);
-        if (process) {
-            std::cout << "\n========================================\n";
-            std::cout << "  PROCESS INFORMATION\n";
-            std::cout << "========================================\n";
-            std::cout << "Process Name: " << process->getName() << "\n";
-            std::cout << "PID: " << process->getPID() << "\n";
-            std::cout << "State: ";
-            if (process->isFinished()) {
-                std::cout << "FINISHED\n";
-                std::cout << "Ended: " << process->getEndTimeString() << "\n";
-            } else if (process->isWaiting()) {
-                std::cout << "SLEEPING (" << process->getWaitTicks() << " ticks remaining)\n";
-            } else {
-                std::cout << "RUNNING\n";
-            }
-            std::cout << "Instructions: " << process->getCommandCounter() 
-                      << " / " << process->getTotalCommands() << "\n";
-            std::cout << "Started: " << process->getStartTimeString() << "\n";
-            
-            std::cout << "\nProcess Logs (PRINT outputs):\n";
-            std::cout << "----------------------------------------\n";
-            const auto& logs = process->getOutputLogs();
-            if (logs.empty()) {
-                std::cout << "(No PRINT outputs yet)\n";
-            } else {
-                for (const auto& log : logs) {
-                    std::cout << "  " << log << "\n";
-                }
-            }
-            std::cout << "========================================\n\n";
-        } else {
+    std::string cmd = command;
+    cmd.erase(0, cmd.find_first_not_of(" \t\n\r\f\v"));
+    cmd.erase(cmd.find_last_not_of(" \t\n\r\f\v") + 1);
+    
+    if (cmd == "exit") {
+        inScreenSession = false;
+        currentScreenProcess = "";
+        std::cout << "Detached from process. Returning to main menu...\n";
+        return;
+    }
+    
+    if (cmd == "process-smi") {
+        if (!scheduler) {
+            std::cout << "Scheduler not available\n";
+            inScreenSession = false;
+            currentScreenProcess = "";
+            return;
+        }
+        
+        // Get a copy of the process with proper locking
+        std::shared_ptr<OSProcess> process = scheduler->findProcessByName(currentScreenProcess);
+        
+        if (!process) {
             std::cout << "Process " << currentScreenProcess << " not found\n";
             inScreenSession = false;
             currentScreenProcess = "";
+            return;
         }
+        
+        // Now safely display process info - the shared_ptr keeps it alive
+        std::cout << "\n========================================\n";
+        std::cout << "  PROCESS INFORMATION\n";
+        std::cout << "========================================\n";
+        std::cout << "Process Name: " << process->getName() << "\n";
+        std::cout << "PID: " << process->getPID() << "\n";
+        std::cout << "State: ";
+        
+        if (process->isFinished()) {
+            std::cout << "FINISHED\n";
+            std::cout << "Ended: " << process->getEndTimeString() << "\n";
+        } else if (process->isWaiting()) {
+            std::cout << "SLEEPING (" << process->getWaitTicks() << " ticks remaining)\n";
+        } else {
+            OSProcess::ProcessState state = process->getState();
+            if (state == OSProcess::RUNNING) {
+                std::cout << "RUNNING\n";
+            } else if (state == OSProcess::READY) {
+                std::cout << "READY\n";
+            } else {
+                std::cout << "UNKNOWN (" << state << ")\n";
+            }
+        }
+        
+        std::cout << "Instructions: " << process->getCommandCounter() 
+                  << " / " << process->getTotalCommands() << "\n";
+        std::cout << "Started: " << process->getStartTimeString() << "\n";
+        
+        std::cout << "\nProcess Logs (PRINT outputs):\n";
+        std::cout << "----------------------------------------\n";
+        const auto& logs = process->getOutputLogs();
+        if (logs.empty()) {
+            std::cout << "(No PRINT outputs yet)\n";
+        } else {
+            size_t count = 0;
+            for (const auto& log : logs) {
+                std::cout << "  " << log << "\n";
+                count++;
+                if (count >= 50 && count < logs.size()) {
+                    std::cout << "  ... (" << (logs.size() - count) << " more logs)\n";
+                    break;
+                }
+            }
+        }
+        std::cout << "========================================\n\n";
+        return;
     }
-    else if (command == "exit") {
-        inScreenSession = false;
-        currentScreenProcess = "";
-        std::cout << "Returning to main menu...\n";
+    
+    if (cmd.find("screen") != std::string::npos) {
+        std::cout << "Cannot use 'screen' commands while attached to a process.\n";
+        std::cout << "Type 'exit' to detach first.\n";
+        return;
     }
-    else {
-        std::cout << "Unknown screen command. Use 'process-smi' or 'exit'\n";
+    
+    if (!cmd.empty()) {
+        std::cout << "Unknown command. Use 'process-smi' or 'exit'\n";
     }
 }
 

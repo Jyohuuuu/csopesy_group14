@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <stack>
+#include <mutex>
 #include "SymbolTable.h"
 #include "ProcessInstructions.h"
 
@@ -47,9 +48,16 @@ public:
     void decrementWaitTicks();
     bool isWaiting() const;
     int getWaitTicks() const;
+
+    std::vector<std::string> getOutputLogs() const {
+        std::lock_guard<std::mutex> lock(outputLogsMutex);
+        return outputLogs;
+    }
     
-    const std::vector<std::string>& getOutputLogs() const { return outputLogs; }
-    void addOutputLog(const std::string& log) { outputLogs.push_back(log); }
+    void addOutputLog(const std::string& log) {
+        std::lock_guard<std::mutex> lock(outputLogsMutex);
+        outputLogs.push_back(log);
+    }
     
 private:
     void executePrint(const Instruction& instr);
@@ -63,6 +71,11 @@ private:
     void setVariableValue(const std::string& name, uint16_t value);
     bool isVariable(const std::string& token);
     uint16_t parseValue(const std::string& token);
+    
+    void logOutput(const std::string& msg) {
+        std::lock_guard<std::mutex> lock(outputLogsMutex);
+        outputLogs.push_back(msg);
+    }
     
     int pid;
     std::string name;
@@ -89,4 +102,5 @@ private:
     bool ended;
     
     std::vector<std::string> outputLogs;
+    mutable std::mutex outputLogsMutex;
 };

@@ -33,9 +33,14 @@ Scheduler::~Scheduler() {
 }
 
 void Scheduler::addProcess(std::shared_ptr<OSProcess> process) {
-    std::lock_guard<std::mutex> lock(queueMutex);
-    readyQueue.push(process);
-    allProcesses.push_back(process);
+    {
+        std::lock_guard<std::mutex> lock(queueMutex);
+        readyQueue.push(process);
+    }
+    {
+        std::lock_guard<std::mutex> lock(processMutex);
+        allProcesses.push_back(process);
+    }
     cv.notify_one();
 }
 
@@ -206,6 +211,7 @@ bool Scheduler::isProcessFinished(const std::string& name) const {
 }
 
 float Scheduler::getCPUUtilization() const {
+    std::lock_guard<std::mutex> lock(processMutex);
     int busyCores = 0;
     for (int i = 0; i < numCores; ++i) {
         if (runningProcesses[i]) busyCores++;
@@ -214,6 +220,7 @@ float Scheduler::getCPUUtilization() const {
 }
 
 int Scheduler::getTotalProcesses() const {
+    std::lock_guard<std::mutex> lock(processMutex);
     return allProcesses.size();
 }
 
@@ -234,8 +241,14 @@ void Scheduler::printStatus() const {
     std::lock_guard<std::mutex> qLock(queueMutex);
     std::lock_guard<std::mutex> outLock(g_outputMutex);
 
+    int busyCores = 0;
+    for (int i = 0; i < numCores; ++i) {
+        if (runningProcesses[i]) busyCores++;
+    }
+    float cpuUtil = (static_cast<float>(busyCores) / numCores) * 100.0f;
+
     std::cout << "\n----------------------------------------\n";
-    std::cout << "CPU Utilization: " << getCPUUtilization() << "%\n";
+    std::cout << "CPU Utilization: " << cpuUtil << "%\n";
     std::cout << "Cores Used: " << numCores - 1 << " | Cores Available: " << numCores << "\n\n";
     
     std::cout << "Running processes:\n";
@@ -294,7 +307,17 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     file << "  CPU UTILIZATION REPORT\n";
     file << "  Generated: " << getCurrentTimeString() << "\n";
     file << "========================================\n";
-    file << "CPU Utilization: " << getCPUUtilization() << "%\n";
+
+    // FIX: same self-relock issue as printStatus() - inline the
+    // calculation instead of calling getCPUUtilization(), which would try
+    // to lock processMutex again while pLock above already holds it.
+    int busyCores = 0;
+    for (int i = 0; i < numCores; ++i) {
+        if (runningProcesses[i]) busyCores++;
+    }
+    float cpuUtil = (static_cast<float>(busyCores) / numCores) * 100.0f;
+
+    file << "CPU Utilization: " << cpuUtil << "%\n";
     file << "Cores Used: " << numCores - 1 << " | Cores Available: " << numCores << "\n\n";
     
     file << "Running processes:\n";

@@ -48,16 +48,25 @@ void OSProcess::executeNextInstruction(int coreId) {
                 if (state.currentIteration < state.maxIterations) {
                     instructionCounter = state.startIndex;
                 } else {
+                    // FIX: read endIndex BEFORE popping. `state` is a
+                    // reference into forLoopStack's top element; once we
+                    // pop(), that element is destroyed and `state` becomes
+                    // a dangling reference. Reading state.endIndex after
+                    // pop() (as the old code did) is undefined behavior.
+                    int newCounter = state.endIndex + 1;
                     forLoopStack.pop();
                     insideForLoop = !forLoopStack.empty();
-                    instructionCounter = state.endIndex + 1;
+                    instructionCounter = newCounter;
                 }
             }
             return;
         } else {
+            // FIX: same dangling-reference issue as above - capture the
+            // value before pop() destroys the object `state` refers to.
+            int newCounter = state.endIndex + 1;
             forLoopStack.pop();
             insideForLoop = !forLoopStack.empty();
-            instructionCounter = state.endIndex + 1;
+            instructionCounter = newCounter;
             return;
         }
     }
@@ -114,7 +123,10 @@ void OSProcess::executePrint(const Instruction& instr) {
         }
     }
     
-    outputLogs.push_back("[PRINT] " + msg);
+    // FIX: was outputLogs.push_back(...) directly, with no synchronization.
+    // logOutput() takes outputLogsMutex, matching the lock used by
+    // getOutputLogs() (called from the console thread via process-smi).
+    logOutput("[PRINT] " + msg);
 }
 
 void OSProcess::executeDeclare(const Instruction& instr) {
@@ -123,7 +135,7 @@ void OSProcess::executeDeclare(const Instruction& instr) {
     uint16_t value = parseValue(instr.params[1]);
     symbolTable.setValue(varName, value);
     
-    outputLogs.push_back("[DECLARE] " + varName + " = " + std::to_string(value));
+    logOutput("[DECLARE] " + varName + " = " + std::to_string(value));
 }
 
 void OSProcess::executeAdd(const Instruction& instr) {
@@ -135,7 +147,7 @@ void OSProcess::executeAdd(const Instruction& instr) {
     if (result > UINT16_MAX) result = UINT16_MAX;
     setVariableValue(destVar, static_cast<uint16_t>(result));
     
-    outputLogs.push_back("[ADD] " + destVar + " = " + std::to_string(val1) + " + " + std::to_string(val2) + " = " + std::to_string(result));
+    logOutput("[ADD] " + destVar + " = " + std::to_string(val1) + " + " + std::to_string(val2) + " = " + std::to_string(result));
 }
 
 void OSProcess::executeSubtract(const Instruction& instr) {
@@ -148,7 +160,7 @@ void OSProcess::executeSubtract(const Instruction& instr) {
     if (result > UINT16_MAX) result = UINT16_MAX;
     setVariableValue(destVar, static_cast<uint16_t>(result));
     
-    outputLogs.push_back("[SUBTRACT] " + destVar + " = " + std::to_string(val1) + " - " + std::to_string(val2) + " = " + std::to_string(result));
+    logOutput("[SUBTRACT] " + destVar + " = " + std::to_string(val1) + " - " + std::to_string(val2) + " = " + std::to_string(result));
 }
 
 void OSProcess::executeSleep(const Instruction& instr) {
@@ -159,7 +171,7 @@ void OSProcess::executeSleep(const Instruction& instr) {
     setWaitTicks(ticks);
     currentState = WAITING;
     
-    outputLogs.push_back("[SLEEP] Sleeping for " + std::to_string(ticks) + " ticks");
+    logOutput("[SLEEP] Sleeping for " + std::to_string(ticks) + " ticks");
 }
 
 void OSProcess::executeFor(const Instruction& instr) {
@@ -168,8 +180,23 @@ void OSProcess::executeFor(const Instruction& instr) {
         return;
     }
     
+    // FIX: `instr` is a reference into instructionList itself (it was
+    // taken as `instructionList[instructionCounter]` by the caller).
+    // instructionList.insert() below can reallocate the vector's buffer,
+    // which invalidates EVERY existing reference into it - including
+    // `instr`. The old code kept reading instr.nestedInstructions inside
+    // the insert loop and instr.repeatCount after it, i.e. reading through
+    // a dangling reference once a reallocation happened. That's undefined
+    // behavior: it can run fine for a while (while the vector has spare
+    // capacity) and then segfault the moment a real reallocation occurs -
+    // which matches an intermittent, hard-to-reproduce crash.
+    // Fix: copy out everything we need from `instr` before mutating
+    // instructionList at all.
+    std::vector<Instruction> nestedCopy = instr.nestedInstructions;
+    int repeatCount = instr.repeatCount;
+    
     int startIndex = instructionCounter + 1;
-    for (const auto& nested : instr.nestedInstructions) {
+    for (const auto& nested : nestedCopy) {
         instructionList.insert(instructionList.begin() + instructionCounter + 1, nested);
         instructionCounter++;
     }
@@ -179,12 +206,12 @@ void OSProcess::executeFor(const Instruction& instr) {
     state.startIndex = startIndex;
     state.endIndex = endIndex;
     state.currentIteration = 0;
-    state.maxIterations = instr.repeatCount;
+    state.maxIterations = repeatCount;
     forLoopStack.push(state);
     insideForLoop = true;
     instructionCounter = startIndex;
     
-    outputLogs.push_back("[FOR] Starting loop with " + std::to_string(instr.repeatCount) + " iterations");
+    logOutput("[FOR] Starting loop with " + std::to_string(repeatCount) + " iterations");
 }
 
 uint16_t OSProcess::getVariableValue(const std::string& name) {
