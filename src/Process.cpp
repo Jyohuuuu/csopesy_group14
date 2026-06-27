@@ -48,11 +48,6 @@ void OSProcess::executeNextInstruction(int coreId) {
                 if (state.currentIteration < state.maxIterations) {
                     instructionCounter = state.startIndex;
                 } else {
-                    // FIX: read endIndex BEFORE popping. `state` is a
-                    // reference into forLoopStack's top element; once we
-                    // pop(), that element is destroyed and `state` becomes
-                    // a dangling reference. Reading state.endIndex after
-                    // pop() (as the old code did) is undefined behavior.
                     int newCounter = state.endIndex + 1;
                     forLoopStack.pop();
                     insideForLoop = !forLoopStack.empty();
@@ -61,8 +56,7 @@ void OSProcess::executeNextInstruction(int coreId) {
             }
             return;
         } else {
-            // FIX: same dangling-reference issue as above - capture the
-            // value before pop() destroys the object `state` refers to.
+
             int newCounter = state.endIndex + 1;
             forLoopStack.pop();
             insideForLoop = !forLoopStack.empty();
@@ -122,10 +116,7 @@ void OSProcess::executePrint(const Instruction& instr) {
             msg = trimmed + " = " + std::to_string(value);
         }
     }
-    
-    // FIX: was outputLogs.push_back(...) directly, with no synchronization.
-    // logOutput() takes outputLogsMutex, matching the lock used by
-    // getOutputLogs() (called from the console thread via process-smi).
+
     logOutput("[PRINT] " + msg);
 }
 
@@ -180,18 +171,6 @@ void OSProcess::executeFor(const Instruction& instr) {
         return;
     }
     
-    // FIX: `instr` is a reference into instructionList itself (it was
-    // taken as `instructionList[instructionCounter]` by the caller).
-    // instructionList.insert() below can reallocate the vector's buffer,
-    // which invalidates EVERY existing reference into it - including
-    // `instr`. The old code kept reading instr.nestedInstructions inside
-    // the insert loop and instr.repeatCount after it, i.e. reading through
-    // a dangling reference once a reallocation happened. That's undefined
-    // behavior: it can run fine for a while (while the vector has spare
-    // capacity) and then segfault the moment a real reallocation occurs -
-    // which matches an intermittent, hard-to-reproduce crash.
-    // Fix: copy out everything we need from `instr` before mutating
-    // instructionList at all.
     std::vector<Instruction> nestedCopy = instr.nestedInstructions;
     int repeatCount = instr.repeatCount;
     

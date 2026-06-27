@@ -168,11 +168,9 @@ void Console::handleScreenAttach(const std::string& name) {
         return;
     }
     
-    // Get a copy of the process with proper locking
     std::shared_ptr<OSProcess> process = scheduler->findProcessByName(name);
     
     if (process) {
-        // Check if finished (lock is released, but shared_ptr keeps process alive)
         if (!process->isFinished()) {
             inScreenSession = true;
             currentScreenProcess = name;
@@ -207,7 +205,6 @@ void Console::processScreenCommand(const std::string& command) {
             return;
         }
         
-        // Get a copy of the process with proper locking
         std::shared_ptr<OSProcess> process = scheduler->findProcessByName(currentScreenProcess);
         
         if (!process) {
@@ -217,7 +214,6 @@ void Console::processScreenCommand(const std::string& command) {
             return;
         }
         
-        // Now safely display process info - the shared_ptr keeps it alive
         std::cout << "\n========================================\n";
         std::cout << "  PROCESS INFORMATION\n";
         std::cout << "========================================\n";

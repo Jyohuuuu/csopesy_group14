@@ -308,9 +308,7 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     file << "  Generated: " << getCurrentTimeString() << "\n";
     file << "========================================\n";
 
-    // FIX: same self-relock issue as printStatus() - inline the
-    // calculation instead of calling getCPUUtilization(), which would try
-    // to lock processMutex again while pLock above already holds it.
+
     int busyCores = 0;
     for (int i = 0; i < numCores; ++i) {
         if (runningProcesses[i]) busyCores++;
