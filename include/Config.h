@@ -3,6 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 
 struct Config {
     int numCpu = 4;
@@ -25,11 +27,16 @@ struct Config {
             if (key == "num-cpu") file >> numCpu;
             else if (key == "scheduler") {
                 std::string schedulerType;
-                file >> schedulerType;
-                if (schedulerType.front() == '"' && schedulerType.back() == '"') {
-                    schedulerType = schedulerType.substr(1, schedulerType.length() - 2);
+                if (file >> schedulerType) {
+                    if (schedulerType.size() >= 2 &&
+                        schedulerType.front() == '"' && schedulerType.back() == '"') {
+                        schedulerType = schedulerType.substr(1, schedulerType.length() - 2);
+                    }
+
+                    std::transform(schedulerType.begin(), schedulerType.end(), schedulerType.begin(),
+                                   [](unsigned char c) { return std::tolower(c); });
+                    scheduler = schedulerType;
                 }
-                scheduler = schedulerType;
             }
             else if (key == "quantum-cycles") file >> quantumCycles;
             else if (key == "batch-process-freq") file >> batchProcessFreq;
@@ -39,6 +46,14 @@ struct Config {
         }
         
         file.close();
+
+        if (scheduler != "fcfs" && scheduler != "rr") {
+            std::cerr << "Warning: unknown scheduler \"" << scheduler
+                       << "\" in config.txt (expected \"fcfs\" or \"rr\"). "
+                       << "Defaulting to \"fcfs\".\n";
+            scheduler = "fcfs";
+        }
+        
         return true;
     }
 };

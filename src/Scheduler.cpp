@@ -157,8 +157,8 @@ void Scheduler::workerThread(int coreId) {
                     break;
                 }
                 
-                if (schedulerAlgorithm == "rr" && quantumCounter >= quantumCycles) {
-                    if (!process->isFinished()) {
+                if (schedulerAlgorithm == "rr") {
+                    if (quantumCounter >= quantumCycles && !process->isFinished()) {
                         process->setState(OSProcess::READY);
                         {
                             std::lock_guard<std::mutex> lock(queueMutex);
@@ -170,6 +170,8 @@ void Scheduler::workerThread(int coreId) {
                         }
                         break;
                     }
+                } else if (schedulerAlgorithm == "fcfs") {
+                    // FCFS: no preemption, continue until finished or waiting
                 }
                 
                 if (delayPerExec > 0) {
@@ -307,7 +309,6 @@ void Scheduler::saveUtilizationReport(const std::string& /*filename*/) const {
     file << "  CPU UTILIZATION REPORT\n";
     file << "  Generated: " << getCurrentTimeString() << "\n";
     file << "========================================\n";
-
 
     int busyCores = 0;
     for (int i = 0; i < numCores; ++i) {
