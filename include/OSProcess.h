@@ -49,6 +49,9 @@ public:
     bool isWaiting() const;
     int getWaitTicks() const;
 
+    bool hasMemory() const { return hasMemoryFlag; }
+    void setHasMemory(bool v) { hasMemoryFlag = v; }
+
     std::vector<std::string> getOutputLogs() const {
         std::lock_guard<std::mutex> lock(outputLogsMutex);
         return outputLogs;
@@ -95,6 +98,8 @@ private:
     
     int waitTicks;
     bool isWaitingState;
+
+    bool hasMemoryFlag = false;
     
     std::chrono::time_point<std::chrono::system_clock> startTime;
     std::chrono::time_point<std::chrono::system_clock> endTime;

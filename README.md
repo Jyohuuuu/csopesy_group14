@@ -9,3 +9,7 @@ Torres, John Vincent R.
 1. Make sure you are located in the root directory of the project.
 2. Run build_mco1.bat
 3. After compilation run the exe file produced. (OSEmulator.exe)
+
+## Entry Class File
+
+The entry class file is in src/, the filename is main_mco1.cpp

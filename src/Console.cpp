@@ -5,6 +5,7 @@
 #include "../include/ConsoleSync.h"
 #include "../include/FileUtils.h"
 #include "../include/ProcessInstructions.h"
+#include "../include/MemoryManager.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -87,7 +88,7 @@ void Console::run() {
 void Console::printMainMenu() {
     std::lock_guard<std::mutex> lock(g_outputMutex);
     std::cout << "\n========================================\n";
-    std::cout << "  OS Emulator v1.02  Last Updated: 2026-6-24\n";
+    std::cout << "  OS Emulator v1.02  Last Updated: 2026-7-11\n";
     std::cout << "========================================\n";
     std::cout << "Commands:\n";
     std::cout << "  initialize      - Load config.txt\n";
@@ -107,8 +108,28 @@ void Console::handleInitialize() {
         initialized = true;
         scheduler = std::make_unique<Scheduler>(config);
         scheduler->start();
-        std::cout << "Initialized with " << config.numCpu << " CPUs, "
-                  << config.scheduler << " scheduler\n";
+        
+        std::cout << "\n========================================\n";
+        std::cout << "  SYSTEM INITIALIZATION COMPLETE\n";
+        std::cout << "========================================\n";
+        
+        std::cout << "\nCPU Configuration:\n";
+        std::cout << "  Number of CPUs: " << config.numCpu << "\n";
+        std::cout << "  Scheduler: " << config.scheduler << "\n";
+        std::cout << "  Quantum Cycles: " << config.quantumCycles << "\n";
+        std::cout << "  Batch Process Frequency: " << config.batchProcessFreq << "\n";
+        std::cout << "  Min Instructions: " << config.minIns << "\n";
+        std::cout << "  Max Instructions: " << config.maxIns << "\n";
+        std::cout << "  Delay Per Execution: " << config.delayPerExec << "\n";
+        
+        std::cout << "\nMemory Configuration:\n";
+        std::cout << "  Total Memory: " << config.maxOverallMem << " bytes (" 
+                  << config.maxOverallMem / 1024 << " KB)\n";
+        std::cout << "  Frame Size: " << config.memPerFrame << " bytes\n";
+        std::cout << "  Memory per Process: " << config.memPerProc << " bytes (" 
+                  << config.memPerProc / 1024 << " KB)\n";
+        
+        std::cout << "\n========================================\n";
     }
 }
 

@@ -16,7 +16,6 @@ public:
         return 0;
     }
     
-    // Add this method
     bool hasValue(const std::string& key) const {
         return table.find(key) != table.end();
     }

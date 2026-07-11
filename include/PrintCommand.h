@@ -31,11 +31,6 @@ public:
 
         std::string timestamp = ss.str();
 
-        // REMOVED: Console output - now only writes to file
-        // std::cout << "[" << timestamp << "] Core " << coreId 
-        //           << " | Process " << processName << " (PID: " << pid 
-        //           << "): " << message << std::endl;
-
         if (enableFileOutput) {
             std::string filename = FileUtils::getProcessLogPath(pid, processName);
             std::lock_guard<std::mutex> lock(fileMutex);

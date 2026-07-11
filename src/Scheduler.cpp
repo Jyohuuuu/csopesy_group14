@@ -3,11 +3,14 @@
 #include "../include/PrintCommand.h"
 #include "../include/FileUtils.h"
 #include "../include/ProcessInstructions.h"
+#include "../include/MemoryManager.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include <fstream>
 #include <random>
+#include <iomanip>
+#include <filesystem>
 
 Scheduler::Scheduler(const Config& config)
     : numCores(config.numCpu), 
@@ -23,9 +26,20 @@ Scheduler::Scheduler(const Config& config)
       generatingProcesses(false),
       batchProcessFreq(config.batchProcessFreq),
       minIns(config.minIns),
-      maxIns(config.maxIns) {
+      maxIns(config.maxIns),
+      memoryManager(std::make_unique<MemoryManager>(
+          config.maxOverallMem,
+          config.memPerFrame,
+          config.memPerProc
+      )),
+      totalMemoryAllocations(0),
+      totalMemoryDeallocations(0),
+      memoryFullCount(0),
+      quantumCounter(0),
+      memoryStampCounter(0) {
     runningProcesses.resize(numCores, nullptr);
     processQuantumCounter.resize(numCores, 0);
+    lastReportTime = std::chrono::steady_clock::now();
 }
 
 Scheduler::~Scheduler() {
@@ -35,7 +49,7 @@ Scheduler::~Scheduler() {
 void Scheduler::addProcess(std::shared_ptr<OSProcess> process) {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
-        readyQueue.push(process);
+        memoryWaitQueue.push(process);
     }
     {
         std::lock_guard<std::mutex> lock(processMutex);
@@ -86,7 +100,36 @@ bool Scheduler::isGenerating() const {
 
 void Scheduler::schedulerThread() {
     while (running) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::shared_ptr<OSProcess> candidate = nullptr;
+        {
+            std::lock_guard<std::mutex> lock(queueMutex);
+            if (!memoryWaitQueue.empty()) {
+                candidate = memoryWaitQueue.front();
+            }
+        }
+
+        if (candidate) {
+            bool allocated = false;
+            {
+                std::lock_guard<std::mutex> lock(processMutex);
+                allocated = memoryManager->allocateMemory(candidate);
+            }
+
+            if (allocated) {
+                candidate->setHasMemory(true);
+                {
+                    std::lock_guard<std::mutex> lock(queueMutex);
+                    memoryWaitQueue.pop();
+                    readyQueue.push(candidate);
+                }
+                cv.notify_all();
+                continue;
+            } else {
+                memoryFullCount++;
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 }
 
@@ -100,6 +143,7 @@ void Scheduler::generationThread() {
         std::string processName = "p" + std::to_string(pidCounter++);
         auto process = std::make_shared<OSProcess>(pidCounter, processName);
         
+        
         std::vector<Instruction> instructions = ProcessGenerator::generateInstructions(
             minIns.load(), maxIns.load(), processName
         );
@@ -112,38 +156,92 @@ void Scheduler::generationThread() {
         
         std::this_thread::sleep_for(std::chrono::milliseconds(batchProcessFreq * 100));
     }
+    
+}
+
+void Scheduler::generateMemoryReport() {
+    std::lock_guard<std::mutex> lock(processMutex);
+
+    int qq = ++memoryStampCounter;
+
+    const std::string outputDir = "memory_stamps";
+    std::error_code ec;
+    std::filesystem::create_directories(outputDir, ec);
+    if (ec) {
+        std::cerr << "Error: Could not create directory " << outputDir
+                   << ": " << ec.message() << "\n";
+        return;
+    }
+
+    std::string filename = outputDir + "/memory_stamp_" + std::to_string(qq) + ".txt";
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open " << filename << " for writing\n";
+        return;
+    }
+
+    auto now = std::chrono::system_clock::now();
+    auto time_t_now = std::chrono::system_clock::to_time_t(now);
+    std::tm tmNow = *std::localtime(&time_t_now);
+    std::stringstream ts;
+    ts << std::put_time(&tmNow, "%m/%d/%Y %I:%M:%S");
+    ts << (tmNow.tm_hour >= 12 ? "PM" : "AM");
+
+    file << "Timestamp: (" << ts.str() << ")\n";
+    file << "Number of processes in memory: " << memoryManager->getProcessCount() << "\n";
+    file << "Total external fragmentation in KB: " << memoryManager->calculateExternalFragmentation() << "\n";
+    file << "\n";
+    file << memoryManager->getASCIIMemoryMap();
+
+    file.close();
 }
 
 void Scheduler::workerThread(int coreId) {
+    
     while (running) {
         std::shared_ptr<OSProcess> process = nullptr;
 
         {
             std::unique_lock<std::mutex> lock(queueMutex);
-            cv.wait(lock, [this] { return !readyQueue.empty() || !running; });
-            if (!running) break;
+            if (readyQueue.empty()) {
+                cv.wait_for(lock, std::chrono::milliseconds(100), [this] { 
+                    return !readyQueue.empty() || !running; 
+                });
+                if (!running) break;
+                if (readyQueue.empty()) continue;
+            }
 
             process = readyQueue.front();
             readyQueue.pop();
         }
 
-        if (process && !process->isFinished()) {
-            process->markStarted();
-            process->setState(OSProcess::RUNNING);
+        if (!process || process->isFinished()) {
+            continue;
+        }
+        process->markStarted();
+        process->setState(OSProcess::RUNNING);
 
-            {
-                std::lock_guard<std::mutex> lock(processMutex);
-                runningProcesses[coreId] = process;
-            }
+        {
+            std::lock_guard<std::mutex> lock(processMutex);
+            runningProcesses[coreId] = process;
+        }
 
-            int quantumCounter = 0;
-            
-            while (!process->isFinished() && running) {
+        int quantumCounterLocal = 0;
+        
+        while (!process->isFinished() && running) {
+            try {
                 process->executeNextInstruction(coreId);
                 totalInstructionsExecuted++;
+                quantumCounterLocal++;
                 quantumCounter++;
                 
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                
+                if (quantumCounter >= quantumCycles) {
+                    quantumCounter = 0;
+                    generateMemoryReport();
+                }
+                
                 if (process->isWaiting()) {
                     process->setState(OSProcess::READY);
                     {
@@ -158,38 +256,39 @@ void Scheduler::workerThread(int coreId) {
                     break;
                 }
                 
-                if (schedulerAlgorithm == "rr") {
-                    if (quantumCounter >= quantumCycles && !process->isFinished()) {
-                        process->setState(OSProcess::READY);
-                        {
-                            std::lock_guard<std::mutex> lock(queueMutex);
-                            readyQueue.push(process);
-                            cv.notify_one();
-                        }
-                        {
-                            std::lock_guard<std::mutex> lock(processMutex);
-                            runningProcesses[coreId] = nullptr;
-                        }
-                        break;
+                if (schedulerAlgorithm == "rr" && quantumCounterLocal >= quantumCycles && !process->isFinished()) {
+                    process->setState(OSProcess::READY);
+                    {
+                        std::lock_guard<std::mutex> lock(queueMutex);
+                        readyQueue.push(process);
+                        cv.notify_one();
                     }
-                } else if (schedulerAlgorithm == "fcfs") {
+                    {
+                        std::lock_guard<std::mutex> lock(processMutex);
+                        runningProcesses[coreId] = nullptr;
+                    }
+                    break;
                 }
                 
-                if (delayPerExec > 0) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(delayPerExec));
-                }
+            } catch (const std::exception& e) {
+                std::cerr << "[ERROR] Exception in worker " << coreId << ": " << e.what() << "\n";
+                break;
             }
+        }
 
-            if (process->isFinished()) {
-                process->markEnded();
-                {
-                    std::lock_guard<std::mutex> lock(processMutex);
-                    finishedCount++;
-                    runningProcesses[coreId] = nullptr;
-                }
+        if (process->isFinished()) {
+            process->markEnded();
+            {
+                std::lock_guard<std::mutex> lock(processMutex);
+                memoryManager->releaseMemory(process);
+                process->setHasMemory(false);
+                totalMemoryDeallocations++;
+                finishedCount++;
+                runningProcesses[coreId] = nullptr;
             }
         }
     }
+    
 }
 
 bool Scheduler::allProcessesFinished() const {
@@ -239,6 +338,26 @@ int Scheduler::getTotalCPUCycles() const {
     return totalCPUCycles;
 }
 
+int Scheduler::getMemoryProcessCount() const {
+    std::lock_guard<std::mutex> lock(processMutex);
+    return memoryManager->getProcessCount();
+}
+
+int Scheduler::getExternalFragmentation() const {
+    std::lock_guard<std::mutex> lock(processMutex);
+    return memoryManager->calculateExternalFragmentation();
+}
+
+std::string Scheduler::getMemoryMap() const {
+    std::lock_guard<std::mutex> lock(processMutex);
+    return memoryManager->getMemoryMap();
+}
+
+int Scheduler::getMemoryWaitQueueSize() const {
+    std::lock_guard<std::mutex> lock(queueMutex);
+    return static_cast<int>(memoryWaitQueue.size());
+}
+
 void Scheduler::printStatus() const {
     std::lock_guard<std::mutex> pLock(processMutex);
     std::lock_guard<std::mutex> qLock(queueMutex);
@@ -253,6 +372,11 @@ void Scheduler::printStatus() const {
     std::cout << "\n----------------------------------------\n";
     std::cout << "CPU Utilization: " << cpuUtil << "%\n";
     std::cout << "Cores Used: " << busyCores << " | Cores Available: " << (numCores - busyCores) << "\n\n";
+    
+    std::cout << "Memory Information:\n";
+    std::cout << "  Processes in memory: " << memoryManager->getProcessCount() << "\n";
+    std::cout << "  External fragmentation: " << memoryManager->calculateExternalFragmentation() / 1024 << " KB\n";
+    std::cout << "  Memory full events: " << memoryFullCount << "\n\n";
     
     std::cout << "Running processes:\n";
     bool anyRunning = false;
@@ -284,6 +408,7 @@ void Scheduler::printStatus() const {
     if (!anyFinished) std::cout << "(none)\n";
 
     std::cout << "\nReady queue size: " << readyQueue.size() << "\n";
+    std::cout << "Waiting for memory: " << memoryWaitQueue.size() << "\n";
     std::cout << "Total processes: " << allProcesses.size()
               << " | Finished: " << finishedCount << "\n";
     std::cout << "Instructions executed: " << totalInstructionsExecuted << "\n";
@@ -320,6 +445,13 @@ void Scheduler::saveUtilizationReport(const std::string&) const {
     file << "CPU Utilization: " << cpuUtil << "%\n";
     file << "Cores Used: " << busyCores << " | Cores Available: " << (numCores - busyCores) << "\n\n";
     
+    file << "Memory Information:\n";
+    file << "  Processes in memory: " << memoryManager->getProcessCount() << "\n";
+    file << "  External fragmentation: " << memoryManager->calculateExternalFragmentation() / 1024 << " KB\n";
+    file << "  Memory full events: " << memoryFullCount << "\n\n";
+    file << "Memory Map:\n";
+    file << memoryManager->getMemoryMap() << "\n";
+    
     file << "Running processes:\n";
     bool anyRunning = false;
     for (int i = 0; i < numCores; ++i) {
@@ -350,13 +482,13 @@ void Scheduler::saveUtilizationReport(const std::string&) const {
     if (!anyFinished) file << "(none)\n";
 
     file << "\nReady queue size: " << readyQueue.size() << "\n";
+    file << "Waiting for memory: " << memoryWaitQueue.size() << "\n";
     file << "Total processes: " << allProcesses.size()
          << " | Finished: " << finishedCount << "\n";
     file << "Instructions executed: " << totalInstructionsExecuted << "\n";
     file << "========================================\n";
     
     file.close();
-    std::cout << "Report saved to: " << reportPath << "\n";
 }
 
 void Scheduler::executeInstruction(std::shared_ptr<OSProcess>, int) {

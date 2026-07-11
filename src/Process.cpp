@@ -14,11 +14,12 @@ void OSProcess::addInstruction(const Instruction& instruction) {
 }
 
 void OSProcess::executeNextInstruction(int coreId) {
+    // If process is waiting (sleeping), decrement wait ticks
     if (isWaitingState) {
         decrementWaitTicks();
         if (waitTicks <= 0) {
             isWaitingState = false;
-            currentState = RUNNING;
+            currentState = READY;
         }
         return;
     }
@@ -56,7 +57,6 @@ void OSProcess::executeNextInstruction(int coreId) {
             }
             return;
         } else {
-
             int newCounter = state.endIndex + 1;
             forLoopStack.pop();
             insideForLoop = !forLoopStack.empty();
@@ -83,8 +83,9 @@ void OSProcess::executeNextInstruction(int coreId) {
             instructionCounter++;
             break;
         case InstructionType::SLEEP:
+            // FIXED: executeSleep now increments instructionCounter internally
             executeSleep(instr);
-            instructionCounter++;
+            // No instructionCounter++ here - it's done inside executeSleep
             break;
         case InstructionType::FOR:
             executeFor(instr);
@@ -154,13 +155,23 @@ void OSProcess::executeSubtract(const Instruction& instr) {
     logOutput("[SUBTRACT] " + destVar + " = " + std::to_string(val1) + " - " + std::to_string(val2) + " = " + std::to_string(result));
 }
 
+// FIXED: executeSleep now increments instructionCounter before sleeping
 void OSProcess::executeSleep(const Instruction& instr) {
-    if (instr.params.empty()) return;
+    if (instr.params.empty()) {
+        instructionCounter++;
+        return;
+    }
+    
     int ticks = parseValue(instr.params[0]);
     if (ticks < 1) ticks = 1;
     if (ticks > 255) ticks = 255;
+    
+    // CRITICAL FIX: Increment instruction counter BEFORE going to sleep
+    instructionCounter++;
+    
     setWaitTicks(ticks);
     currentState = WAITING;
+    isWaitingState = true;
     
     logOutput("[SLEEP] Sleeping for " + std::to_string(ticks) + " ticks");
 }
@@ -258,7 +269,20 @@ std::string OSProcess::getEndTimeString() const {
     return ss.str();
 }
 
-void OSProcess::setWaitTicks(int ticks) { waitTicks = ticks; isWaitingState = true; }
-void OSProcess::decrementWaitTicks() { if (waitTicks > 0) waitTicks--; }
+void OSProcess::setWaitTicks(int ticks) { 
+    waitTicks = ticks; 
+    isWaitingState = true; 
+}
+
+void OSProcess::decrementWaitTicks() { 
+    if (waitTicks > 0) {
+        waitTicks--;
+        if (waitTicks == 0) {
+            isWaitingState = false;
+            currentState = READY;
+        }
+    }
+}
+
 bool OSProcess::isWaiting() const { return isWaitingState; }
 int OSProcess::getWaitTicks() const { return waitTicks; }

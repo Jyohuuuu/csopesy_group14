@@ -15,6 +15,9 @@ struct Config {
     int minIns = 1000;
     int maxIns = 2000;
     int delayPerExec = 0;
+    int maxOverallMem = 16384;
+    int memPerFrame = 16;
+    int memPerProc = 4096;
     
     bool loadFromFile(const std::string& filename = "config.txt") {
         std::ifstream file(filename);
@@ -43,6 +46,9 @@ struct Config {
             else if (key == "min-ins") file >> minIns;
             else if (key == "max-ins") file >> maxIns;
             else if (key == "delay-per-exec") file >> delayPerExec;
+            else if (key == "max-overall-mem") file >> maxOverallMem;
+            else if (key == "mem-per-frame") file >> memPerFrame;
+            else if (key == "mem-per-proc") file >> memPerProc;
         }
         
         file.close();
@@ -54,7 +60,6 @@ struct Config {
             scheduler = "fcfs";
         }
         
-
         auto clamp = [](int& value, int lo, int hi, const char* name) {
             if (value < lo || value > hi) {
                 std::cerr << "Warning: \"" << name << "\" value " << value
@@ -71,11 +76,22 @@ struct Config {
         clamp(minIns, 1, INT_MAX, "min-ins");
         clamp(maxIns, 1, INT_MAX, "max-ins");
         clamp(delayPerExec, 0, INT_MAX, "delay-per-exec");
+        clamp(maxOverallMem, 1, INT_MAX, "max-overall-mem");
+        clamp(memPerFrame, 1, INT_MAX, "mem-per-frame");
+        clamp(memPerProc, 1, INT_MAX, "mem-per-proc");
         
         if (minIns > maxIns) {
             std::cerr << "Warning: min-ins (" << minIns << ") > max-ins (" << maxIns
                        << "). Swapping them.\n";
             std::swap(minIns, maxIns);
+        }
+        
+        if (memPerProc % memPerFrame != 0) {
+            std::cerr << "Warning: mem-per-proc (" << memPerProc 
+                      << ") is not a multiple of mem-per-frame (" << memPerFrame 
+                      << "). Adjusting mem-per-proc to " << (memPerProc / memPerFrame) * memPerFrame << "\n";
+            memPerProc = (memPerProc / memPerFrame) * memPerFrame;
+            if (memPerProc == 0) memPerProc = memPerFrame;
         }
         
         return true;
