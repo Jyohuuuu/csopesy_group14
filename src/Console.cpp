@@ -429,15 +429,14 @@ void Console::handleScreenAttach(const std::string& name) {
             return;
         }
         
-        if (!process->isFinished()) {
-            inScreenSession = true;
-            currentScreenProcess = name;
-            std::cout << "\n=== Attached to " << name << " ===\n";
-            std::cout << "Commands: process-smi, vmstat, exit\n";
-            std::cout << "Type 'exit' to detach from process\n\n";
-        } else {
-            std::cout << "Process " << name << " has already finished\n";
+        inScreenSession = true;
+        currentScreenProcess = name;
+        std::cout << "\n=== Attached to " << name << " ===\n";
+        if (process->isFinished()) {
+            std::cout << "(Process has already finished.)\n";
         }
+        std::cout << "Commands: process-smi, vmstat, exit\n";
+        std::cout << "Type 'exit' to detach from process\n\n";
     } else {
         std::cout << "Process " << name << " not found\n";
     }
