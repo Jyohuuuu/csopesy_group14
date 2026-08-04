@@ -352,6 +352,76 @@ std::vector<Instruction> Console::parseCustomInstructions(const std::string& ins
 
 Instruction Console::parseSingleInstruction(const std::string& instr, bool& valid) {
     valid = true;
+    
+    if (instr.rfind("PRINT", 0) == 0) {
+        std::string rest = instr.substr(5);
+        
+        size_t start = rest.find_first_not_of(" \t");
+        rest = (start == std::string::npos) ? "" : rest.substr(start);
+        
+        if (!rest.empty() && rest.front() == '(') {
+            size_t closeParen = rest.rfind(')');
+            rest = (closeParen != std::string::npos) 
+                   ? rest.substr(1, closeParen - 1) 
+                   : rest.substr(1);
+        }
+        
+        std::string unescaped;
+        for (size_t i = 0; i < rest.size(); ++i) {
+            if (rest[i] == '\\' && i + 1 < rest.size() && rest[i + 1] == '"') {
+                unescaped += '"';
+                ++i;
+            } else {
+                unescaped += rest[i];
+            }
+        }
+        rest = unescaped;
+        
+        std::vector<std::string> tokens;
+        std::string current;
+        bool inQuotes = false;
+        for (char c : rest) {
+            if (c == '"') {
+                inQuotes = !inQuotes;
+                current += c;
+            } else if (c == '+' && !inQuotes) {
+                tokens.push_back(current);
+                current.clear();
+            } else {
+                current += c;
+            }
+        }
+        tokens.push_back(current);
+        
+        std::string literalPrefix;
+        std::string varName;
+        bool haveVar = false;
+        
+        for (auto& tok : tokens) {
+            size_t s = tok.find_first_not_of(" \t");
+            size_t e = tok.find_last_not_of(" \t");
+            if (s == std::string::npos) continue;
+            std::string t = tok.substr(s, e - s + 1);
+            
+            if (t.size() >= 2 && t.front() == '"' && t.back() == '"') {
+                literalPrefix += t.substr(1, t.size() - 2);
+            } else if (!t.empty() && !haveVar) {
+                varName = t;
+                haveVar = true;
+            }
+        }
+        
+        if (haveVar) {
+            while (!literalPrefix.empty() && literalPrefix.back() == ' ') literalPrefix.pop_back();
+            if (!literalPrefix.empty() && literalPrefix.back() == ':') literalPrefix.pop_back();
+            while (!literalPrefix.empty() && literalPrefix.back() == ' ') literalPrefix.pop_back();
+            
+            return Instruction(InstructionType::PRINT, {literalPrefix + " + " + varName});
+        } else {
+            return Instruction(InstructionType::PRINT, {literalPrefix});
+        }
+    }
+    
     std::stringstream ss(instr);
     std::string command;
     ss >> command;
@@ -362,43 +432,20 @@ Instruction Console::parseSingleInstruction(const std::string& instr, bool& vali
         params.push_back(param);
     }
     
-    if (command == "PRINT") {
-        std::string message;
-        for (size_t i = 0; i < params.size(); ++i) {
-            if (i > 0) message += " ";
-            message += params[i];
-        }
-        if (message.size() >= 2 && message.front() == '"' && message.back() == '"') {
-            message = message.substr(1, message.size() - 2);
-        }
-        return Instruction(InstructionType::PRINT, {message});
-    } else if (command == "DECLARE") {
-        if (params.size() >= 2) {
-            return Instruction(InstructionType::DECLARE, {params[0], params[1]});
-        }
+    if (command == "DECLARE") {
+        if (params.size() >= 2) return Instruction(InstructionType::DECLARE, {params[0], params[1]});
     } else if (command == "ADD") {
-        if (params.size() >= 3) {
-            return Instruction(InstructionType::ADD, {params[0], params[1], params[2]});
-        }
+        if (params.size() >= 3) return Instruction(InstructionType::ADD, {params[0], params[1], params[2]});
     } else if (command == "SUBTRACT") {
-        if (params.size() >= 3) {
-            return Instruction(InstructionType::SUBTRACT, {params[0], params[1], params[2]});
-        }
+        if (params.size() >= 3) return Instruction(InstructionType::SUBTRACT, {params[0], params[1], params[2]});
     } else if (command == "SLEEP") {
-        if (params.size() >= 1) {
-            return Instruction(InstructionType::SLEEP, {params[0]});
-        }
+        if (params.size() >= 1) return Instruction(InstructionType::SLEEP, {params[0]});
     } else if (command == "READ") {
-        if (params.size() >= 2) {
-            return Instruction(InstructionType::READ, {params[0], params[1]});
-        }
+        if (params.size() >= 2) return Instruction(InstructionType::READ, {params[0], params[1]});
     } else if (command == "WRITE") {
-        if (params.size() >= 2) {
-            return Instruction(InstructionType::WRITE, {params[0], params[1]});
-        }
+        if (params.size() >= 2) return Instruction(InstructionType::WRITE, {params[0], params[1]});
     }
     
-    // Nothing matched, or matched but wrong arg count
     valid = false;
     return Instruction(InstructionType::PRINT, {""});
 }
