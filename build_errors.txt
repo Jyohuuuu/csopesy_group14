@@ -1,4 +1,55 @@
+In file included from src/../include/OSProcess.h:13,
+                 from src/../include/Scheduler.h:13,
+                 from src/../include/Console.h:3,
+                 from src/main_mco1.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from src/../include/OSProcess.h:13,
+                 from src/../include/Scheduler.h:13,
+                 from src/../include/Console.h:3,
+                 from src/Console.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from src/../include/OSProcess.h:13,
+                 from src/../include/Scheduler.h:13,
+                 from src/Scheduler.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from src/../include/OSProcess.h:13,
+                 from src/Process.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+src/../include/OSProcess.h: In constructor 'OSProcess::OSProcess(int, std::string)':
+src/../include/OSProcess.h:142:10: warning: 'OSProcess::ended' will be initialized after [-Wreorder]
+  142 |     bool ended;
+      |          ^~~~~
+src/../include/OSProcess.h:128:9: warning:   'int OSProcess::memorySize' [-Wreorder]
+  128 |     int memorySize = 4096;  // Default memory size
+      |         ^~~~~~~~~~
+src/Process.cpp:9:1: warning:   when initialized here [-Wreorder]
+    9 | OSProcess::OSProcess(int pid, std::string name)
+      | ^~~~~~~~~
 src/Process.cpp: In member function 'void OSProcess::executeNextInstruction(int)':
-src/Process.cpp:16:44: warning: unused parameter 'coreId' [-Wunused-parameter]
-   16 | void OSProcess::executeNextInstruction(int coreId) {
+src/Process.cpp:18:44: warning: unused parameter 'coreId' [-Wunused-parameter]
+   18 | void OSProcess::executeNextInstruction(int coreId) {
       |                                        ~~~~^~~~~~
+In file included from src/../include/OSProcess.h:13,
+                 from src/../include/MemoryManager.h:10,
+                 from src/MemoryManager.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+In file included from src/SymbolTable.cpp:1:
+src/../include/SymbolTable.h: In member function 'void SymbolTable::setValue(const std::string&, uint16_t)':
+src/../include/SymbolTable.h:18:26: warning: comparison of integer expressions of different signedness: 'std::unordered_map<std::__cxx11::basic_string<char>, short unsigned int>::size_type' {aka 'long long unsigned int'} and 'int' [-Wsign-compare]
+   18 |         if (table.size() >= maxVariables && table.find(name) == table.end()) {
+      |             ~~~~~~~~~~~~~^~~~~~~~~~~~~~~

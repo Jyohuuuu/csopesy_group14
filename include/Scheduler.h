@@ -50,6 +50,13 @@ public:
     int getExternalFragmentation() const;
     std::string getMemoryMap() const;
     int getMemoryWaitQueueSize() const;
+    
+    const Config& getConfig() const { return config; }
+    int getMemoryUsed() const;
+    int getIdleTicks() const { return idleTicks; }
+    int getActiveTicks() const { return activeTicks; }
+    int getTotalTicks() const { return totalTicks; }
+
 private:
     void schedulerThread();
     void workerThread(int coreId);
@@ -58,15 +65,9 @@ private:
     void generateMemoryReport(); 
     std::string getCurrentTimeString() const;
     
+    Config config;
     int numCores;
-    // Processes admitted into memory and eligible for a CPU (short-term /
-    // CPU-ready queue). Only ever contains processes for which
-    // process->hasMemory() is true.
     std::queue<std::shared_ptr<OSProcess>> readyQueue;
-    // Processes waiting to be admitted into memory (long-term / admission
-    // queue). Kept separate from readyQueue so that a burst of new arrivals
-    // can never delay the CPU dispatch of processes that are already
-    // memory-resident and ready to run.
     std::queue<std::shared_ptr<OSProcess>> memoryWaitQueue;
     std::vector<std::shared_ptr<OSProcess>> allProcesses;
     std::vector<std::thread> workers;
@@ -103,4 +104,10 @@ private:
     int quantumCounter;
     std::atomic<int> memoryStampCounter;
     std::chrono::steady_clock::time_point lastReportTime;
+    
+    std::atomic<int> idleTicks;
+    std::atomic<int> activeTicks;
+    std::atomic<int> totalTicks;
+    
+    std::string backingStoreFile = "csopesy-backing-store.txt";
 };

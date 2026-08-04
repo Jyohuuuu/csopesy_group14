@@ -13,7 +13,8 @@
 #include <filesystem>
 
 Scheduler::Scheduler(const Config& config)
-    : numCores(config.numCpu), 
+    : config(config),
+      numCores(config.numCpu), 
       running(false), 
       finishedCount(0),
       schedulerAlgorithm(config.scheduler),
@@ -30,23 +31,28 @@ Scheduler::Scheduler(const Config& config)
       memoryManager(std::make_unique<MemoryManager>(
           config.maxOverallMem,
           config.memPerFrame,
-          config.memPerProc
+          config.minMemPerProc
       )),
       totalMemoryAllocations(0),
       totalMemoryDeallocations(0),
       memoryFullCount(0),
       quantumCounter(0),
-      memoryStampCounter(0) {
+      memoryStampCounter(0),
+      idleTicks(0),
+      activeTicks(0),
+      totalTicks(0) {
     runningProcesses.resize(numCores, nullptr);
     processQuantumCounter.resize(numCores, 0);
     lastReportTime = std::chrono::steady_clock::now();
 }
-
 Scheduler::~Scheduler() {
     stop();
 }
 
 void Scheduler::addProcess(std::shared_ptr<OSProcess> process) {
+    if (process) {
+        process->setMemoryManager(std::shared_ptr<MemoryManager>(memoryManager.get(), [](MemoryManager*){}));
+    }
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         memoryWaitQueue.push(process);
@@ -76,6 +82,10 @@ void Scheduler::stop() {
 
     for (auto& worker : workers) {
         if (worker.joinable()) worker.join();
+    }
+    
+    if (memoryManager) {
+        memoryManager->saveToBackingStore(backingStoreFile);
     }
 }
 
@@ -126,6 +136,7 @@ void Scheduler::schedulerThread() {
                 continue;
             } else {
                 memoryFullCount++;
+                memoryManager->saveToBackingStore(backingStoreFile);
             }
         }
 
@@ -138,25 +149,27 @@ void Scheduler::generationThread() {
     static std::random_device rd;
     static std::mt19937 gen(rd());
     static std::uniform_int_distribution<> insCountDist(100, 200);
-    
+    std::uniform_int_distribution<> memSizeDist(config.minMemPerProc, config.maxMemPerProc);
+
     while (generatingProcesses && running) {
         std::string processName = "p" + std::to_string(pidCounter++);
         auto process = std::make_shared<OSProcess>(pidCounter, processName);
-        
-        
+
+        int procMemSize = memSizeDist(gen);
+        process->setMemorySize(procMemSize);
+
         std::vector<Instruction> instructions = ProcessGenerator::generateInstructions(
-            minIns.load(), maxIns.load(), processName
+            minIns.load(), maxIns.load(), processName, procMemSize
         );
-        
+
         for (const auto& instr : instructions) {
             process->addInstruction(instr);
         }
-        
+
         addProcess(process);
-        
+
         std::this_thread::sleep_for(std::chrono::milliseconds(batchProcessFreq * 100));
     }
-    
 }
 
 void Scheduler::generateMemoryReport() {
@@ -189,7 +202,7 @@ void Scheduler::generateMemoryReport() {
 
     file << "Timestamp: (" << ts.str() << ")\n";
     file << "Number of processes in memory: " << memoryManager->getProcessCount() << "\n";
-    file << "Total external fragmentation in KB: " << memoryManager->calculateExternalFragmentation() << "\n";
+    file << "Total external fragmentation in KB: " << memoryManager->calculateExternalFragmentation() / 1024 << "\n";
     file << "\n";
     file << memoryManager->getASCIIMemoryMap();
 
@@ -197,7 +210,6 @@ void Scheduler::generateMemoryReport() {
 }
 
 void Scheduler::workerThread(int coreId) {
-    
     while (running) {
         std::shared_ptr<OSProcess> process = nullptr;
 
@@ -208,7 +220,11 @@ void Scheduler::workerThread(int coreId) {
                     return !readyQueue.empty() || !running; 
                 });
                 if (!running) break;
-                if (readyQueue.empty()) continue;
+                if (readyQueue.empty()) {
+                    idleTicks++;
+                    totalTicks++;
+                    continue;
+                }
             }
 
             process = readyQueue.front();
@@ -216,8 +232,25 @@ void Scheduler::workerThread(int coreId) {
         }
 
         if (!process || process->isFinished()) {
+            idleTicks++;
+            totalTicks++;
             continue;
         }
+        
+        if (process->hasMemoryViolation()) {
+            process->setState(OSProcess::FINISHED);
+            process->markEnded();
+            {
+                std::lock_guard<std::mutex> lock(processMutex);
+                memoryManager->releaseMemory(process);
+                process->setHasMemory(false);
+                totalMemoryDeallocations++;
+                finishedCount++;
+                runningProcesses[coreId] = nullptr;
+            }
+            continue;
+        }
+        
         process->markStarted();
         process->setState(OSProcess::RUNNING);
 
@@ -227,9 +260,25 @@ void Scheduler::workerThread(int coreId) {
         }
 
         int quantumCounterLocal = 0;
+        activeTicks++;
+        totalTicks++;
         
         while (!process->isFinished() && running) {
             try {
+                if (process->hasMemoryViolation()) {
+                    process->setState(OSProcess::FINISHED);
+                    process->markEnded();
+                    {
+                        std::lock_guard<std::mutex> lock(processMutex);
+                        memoryManager->releaseMemory(process);
+                        process->setHasMemory(false);
+                        totalMemoryDeallocations++;
+                        finishedCount++;
+                        runningProcesses[coreId] = nullptr;
+                    }
+                    break;
+                }
+                
                 process->executeNextInstruction(coreId);
                 totalInstructionsExecuted++;
                 quantumCounterLocal++;
@@ -288,7 +337,13 @@ void Scheduler::workerThread(int coreId) {
             }
         }
     }
-    
+}
+
+int Scheduler::getMemoryUsed() const {
+    if (memoryManager) {
+        return memoryManager->getUsedMemory();
+    }
+    return 0;
 }
 
 bool Scheduler::allProcessesFinished() const {
@@ -376,7 +431,9 @@ void Scheduler::printStatus() const {
     std::cout << "Memory Information:\n";
     std::cout << "  Processes in memory: " << memoryManager->getProcessCount() << "\n";
     std::cout << "  External fragmentation: " << memoryManager->calculateExternalFragmentation() / 1024 << " KB\n";
-    std::cout << "  Memory full events: " << memoryFullCount << "\n\n";
+    std::cout << "  Memory full events: " << memoryFullCount << "\n";
+    std::cout << "  Pages paged in: " << memoryManager->getNumPagesPagedIn() << "\n";
+    std::cout << "  Pages paged out: " << memoryManager->getNumPagesPagedOut() << "\n\n";
     
     std::cout << "Running processes:\n";
     bool anyRunning = false;
@@ -384,7 +441,7 @@ void Scheduler::printStatus() const {
         if (runningProcesses[i]) {
             auto p = runningProcesses[i];
             std::cout << "- " << p->getName() 
-                      << " (Started: " << p->getStartTimeString() << ")  "
+                      << " (Memory: " << p->getMemorySize() << " bytes)  "
                       << "Core: " << i << "  "
                       << p->getCommandCounter() 
                       << " / " << p->getTotalCommands() << "\n";
@@ -448,7 +505,9 @@ void Scheduler::saveUtilizationReport(const std::string&) const {
     file << "Memory Information:\n";
     file << "  Processes in memory: " << memoryManager->getProcessCount() << "\n";
     file << "  External fragmentation: " << memoryManager->calculateExternalFragmentation() / 1024 << " KB\n";
-    file << "  Memory full events: " << memoryFullCount << "\n\n";
+    file << "  Memory full events: " << memoryFullCount << "\n";
+    file << "  Pages paged in: " << memoryManager->getNumPagesPagedIn() << "\n";
+    file << "  Pages paged out: " << memoryManager->getNumPagesPagedOut() << "\n\n";
     file << "Memory Map:\n";
     file << memoryManager->getMemoryMap() << "\n";
     
@@ -458,7 +517,7 @@ void Scheduler::saveUtilizationReport(const std::string&) const {
         if (runningProcesses[i]) {
             auto p = runningProcesses[i];
             file << "- " << p->getName() 
-                 << " (Started: " << p->getStartTimeString() << ")  "
+                 << " (Memory: " << p->getMemorySize() << " bytes)  "
                  << "Core: " << i << "  "
                  << p->getCommandCounter() 
                  << " / " << p->getTotalCommands() << "\n";

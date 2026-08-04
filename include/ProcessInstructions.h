@@ -4,6 +4,8 @@
 #include <cstdint>
 #include <random>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 
 enum class InstructionType {
     PRINT,
@@ -11,7 +13,9 @@ enum class InstructionType {
     ADD,
     SUBTRACT,
     SLEEP,
-    FOR
+    FOR,
+    READ,
+    WRITE
 };
 
 struct Instruction {
@@ -27,16 +31,19 @@ struct Instruction {
 
 class ProcessGenerator {
 public:
-    static std::vector<Instruction> generateInstructions(int minCount, int maxCount, const std::string& processName) {
+    static std::vector<Instruction> generateInstructions(int minCount, int maxCount, 
+                                                       const std::string& processName,
+                                                       uint32_t memorySize) {
         static std::random_device rd;
         static std::mt19937 gen(rd());
-        static std::uniform_int_distribution<> typeDist(0, 5);
+        static std::uniform_int_distribution<> typeDist(0, 7);
         static std::uniform_int_distribution<> varDist(0, 9);
         static std::uniform_int_distribution<> valueDist(1, 100);
         static std::uniform_int_distribution<> sleepDist(1, 10);
         static std::uniform_int_distribution<> forNestedDist(1, 3);
-        
-        std::uniform_int_distribution<> countDist(minCount, maxCount);
+        static std::uniform_int_distribution<> countDist(minCount, maxCount);
+        uint32_t maxAlignedAddr = (memorySize >= 16) ? (memorySize / 16 - 1) : 0;
+        std::uniform_int_distribution<> addressDist(0, static_cast<int>(maxAlignedAddr));
         int instructionCount = countDist(gen);
         std::vector<Instruction> instructions;
         
@@ -45,38 +52,42 @@ public:
             int type = typeDist(gen);
             
             switch(type) {
-                case 0: // PRINT
+                case 0: { // PRINT
                     inst.type = InstructionType::PRINT;
-                    // Format: "Hello world from <process_name>!"
                     inst.params.push_back("Hello world from " + processName + "!");
                     break;
+                }
                     
-                case 1: // DECLARE
+                case 1: { // DECLARE
                     inst.type = InstructionType::DECLARE;
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
                     inst.params.push_back(std::to_string(valueDist(gen) % 100));
                     break;
+                }
                     
-                case 2: // ADD
+                case 2: { // ADD
                     inst.type = InstructionType::ADD;
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
                     inst.params.push_back(std::to_string(valueDist(gen) % 50));
                     break;
+                }
                     
-                case 3: // SUBTRACT
+                case 3: { // SUBTRACT
                     inst.type = InstructionType::SUBTRACT;
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
                     inst.params.push_back("var" + std::to_string(varDist(gen)));
                     inst.params.push_back(std::to_string(valueDist(gen) % 50));
                     break;
+                }
                     
-                case 4: // SLEEP
+                case 4: { // SLEEP
                     inst.type = InstructionType::SLEEP;
                     inst.params.push_back(std::to_string(sleepDist(gen)));
                     break;
+                }
                     
-                case 5: // FOR
+                case 5: { // FOR
                     inst.type = InstructionType::FOR;
                     inst.repeatCount = valueDist(gen) % 5 + 1;
                     
@@ -110,6 +121,27 @@ public:
                         inst.nestedInstructions.push_back(nested);
                     }
                     break;
+                }
+                    
+                case 6: { // READ
+                    inst.type = InstructionType::READ;
+                    std::string varName = "var" + std::to_string(varDist(gen));
+                    uint32_t addr = addressDist(gen) * 16;
+                    std::stringstream ss;
+                    ss << "0x" << std::hex << std::setw(4) << std::setfill('0') << addr;
+                    inst.params = {varName, ss.str()};
+                    break;
+                }
+                    
+                case 7: { // WRITE
+                    inst.type = InstructionType::WRITE;
+                    uint32_t addr = addressDist(gen) * 16;
+                    std::stringstream ss;
+                    ss << "0x" << std::hex << std::setw(4) << std::setfill('0') << addr;
+                    int val = valueDist(gen) % 65535;
+                    inst.params = {ss.str(), std::to_string(val)};
+                    break;
+                }
             }
             instructions.push_back(inst);
         }

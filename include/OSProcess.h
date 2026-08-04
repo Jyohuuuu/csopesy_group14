@@ -13,7 +13,9 @@
 #include "SymbolTable.h"
 #include "ProcessInstructions.h"
 
-class OSProcess {
+class MemoryManager;
+
+class OSProcess : public std::enable_shared_from_this<OSProcess> {
 public:
     enum ProcessState {
         READY,
@@ -52,6 +54,18 @@ public:
     bool hasMemory() const { return hasMemoryFlag; }
     void setHasMemory(bool v) { hasMemoryFlag = v; }
 
+    int getMemorySize() const { return memorySize; }
+    void setMemorySize(int size) { memorySize = size; }
+    int getMemoryUsed() const { return memoryUsed; }
+    void setMemoryUsed(int used) { memoryUsed = used; }
+    
+    bool hasMemoryViolation() const { return hasViolation; }
+    uint32_t getViolationAddress() const { return violationAddress; }
+    std::string getViolationTimeString() const;
+    void setViolationAddress(uint32_t address);
+    
+    void setMemoryManager(std::shared_ptr<MemoryManager> mm) { memoryManager = mm; }
+    
     std::vector<std::string> getOutputLogs() const {
         std::lock_guard<std::mutex> lock(outputLogsMutex);
         return outputLogs;
@@ -69,11 +83,15 @@ private:
     void executeSubtract(const Instruction& instr);
     void executeSleep(const Instruction& instr);
     void executeFor(const Instruction& instr);
+    void executeRead(const Instruction& instr);
+    void executeWrite(const Instruction& instr);
     
     uint16_t getVariableValue(const std::string& name);
     void setVariableValue(const std::string& name, uint16_t value);
     bool isVariable(const std::string& token);
     uint16_t parseValue(const std::string& token);
+    uint32_t parseHexAddress(const std::string& str) const;
+    std::string toHexString(uint32_t value) const;
     
     void logOutput(const std::string& msg) {
         std::lock_guard<std::mutex> lock(outputLogsMutex);
@@ -100,6 +118,15 @@ private:
     bool isWaitingState;
 
     bool hasMemoryFlag = false;
+    
+    int memorySize = 4096;
+    int memoryUsed = 0;
+    
+    bool hasViolation = false;
+    uint32_t violationAddress = 0;
+    std::chrono::time_point<std::chrono::system_clock> violationTime;
+    
+    std::shared_ptr<MemoryManager> memoryManager;
     
     std::chrono::time_point<std::chrono::system_clock> startTime;
     std::chrono::time_point<std::chrono::system_clock> endTime;

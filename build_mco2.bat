@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 echo ========================================
-echo   OS Emulator - Build Script
+echo   OS Emulator v2.0 - Build Script
 echo ========================================
 echo.
 
@@ -34,7 +34,10 @@ if not exist config.txt (
 echo Compiling...
 echo.
 
-REM Compile with all source files INCLUDING MemoryManager.cpp
+REM Clean old object files (optional)
+if exist *.o del *.o
+
+REM Compile with all source files
 g++ -std=c++17 -Wall -Wextra -O2 -D_GNU_SOURCE ^
     src/main_mco1.cpp ^
     src/Console.cpp ^
@@ -42,6 +45,7 @@ g++ -std=c++17 -Wall -Wextra -O2 -D_GNU_SOURCE ^
     src/Process.cpp ^
     src/PrintCommand.cpp ^
     src/MemoryManager.cpp ^
+    src/SymbolTable.cpp ^
     -Iinclude ^
     -o OSEmulator.exe ^
     -pthread 2> build_errors.txt
@@ -51,16 +55,6 @@ if %errorlevel% neq 0 (
     echo ========================================
     echo   ERROR: Compilation failed!
     echo ========================================
-    echo.
-    echo Error log saved to: build_errors.txt
-    echo.
-    echo First 20 errors:
-    echo ----------------------------------------
-    type build_errors.txt | findstr /C:"error:" | head -n 20
-    echo.
-    echo To see full errors, open build_errors.txt
-    echo.
-    pause
     exit /b 1
 )
 
@@ -70,10 +64,19 @@ echo   Compilation Successful!
 echo ========================================
 echo.
 
+REM Create necessary directories
 if not exist process_logs mkdir process_logs
 if not exist reports mkdir reports
+if not exist memory_stamps mkdir memory_stamps
 
 echo Build complete. Run OSEmulator.exe manually when ready.
+echo.
+echo New Features Available:
+echo   - Demand paging memory manager
+echo   - READ/WRITE instructions
+echo   - Custom instructions via screen -c
+echo   - vmstat command for memory statistics
+echo   - Backing store (csopesy-backing-store.txt)
 echo.
 echo Memory Configuration:
 echo   - Total Memory: 16384 bytes
@@ -81,3 +84,4 @@ echo   - Frame Size: 16 bytes
 echo   - Memory per Process: 4096 bytes
 echo   - Max Processes in Memory: 4
 echo.
+pause

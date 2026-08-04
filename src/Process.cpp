@@ -1,20 +1,21 @@
 #include "../include/OSProcess.h"
+#include "../include/MemoryManager.h"
 #include <iostream>
 #include <algorithm>
 #include <cctype>
 #include <climits>
+#include <cstdint>
 
 OSProcess::OSProcess(int pid, std::string name) 
     : pid(pid), name(name), currentState(READY), instructionCounter(0),
       insideForLoop(false), waitTicks(0), isWaitingState(false),
-      started(false), ended(false) {}
+      started(false), ended(false), memorySize(4096), memoryUsed(0) {}
 
 void OSProcess::addInstruction(const Instruction& instruction) {
     instructionList.push_back(instruction);
 }
 
 void OSProcess::executeNextInstruction(int coreId) {
-    // If process is waiting (sleeping), decrement wait ticks
     if (isWaitingState) {
         decrementWaitTicks();
         if (waitTicks <= 0) {
@@ -41,6 +42,8 @@ void OSProcess::executeNextInstruction(int coreId) {
                     case InstructionType::DECLARE: executeDeclare(nestedInstr); break;
                     case InstructionType::ADD: executeAdd(nestedInstr); break;
                     case InstructionType::SUBTRACT: executeSubtract(nestedInstr); break;
+                    case InstructionType::READ: executeRead(nestedInstr); break;
+                    case InstructionType::WRITE: executeWrite(nestedInstr); break;
                     default: break;
                 }
                 instructionCounter++;
@@ -83,12 +86,18 @@ void OSProcess::executeNextInstruction(int coreId) {
             instructionCounter++;
             break;
         case InstructionType::SLEEP:
-            // FIXED: executeSleep now increments instructionCounter internally
             executeSleep(instr);
-            // No instructionCounter++ here - it's done inside executeSleep
             break;
         case InstructionType::FOR:
             executeFor(instr);
+            break;
+        case InstructionType::READ:
+            executeRead(instr);
+            instructionCounter++;
+            break;
+        case InstructionType::WRITE:
+            executeWrite(instr);
+            instructionCounter++;
             break;
         default:
             instructionCounter++;
@@ -155,7 +164,6 @@ void OSProcess::executeSubtract(const Instruction& instr) {
     logOutput("[SUBTRACT] " + destVar + " = " + std::to_string(val1) + " - " + std::to_string(val2) + " = " + std::to_string(result));
 }
 
-// FIXED: executeSleep now increments instructionCounter before sleeping
 void OSProcess::executeSleep(const Instruction& instr) {
     if (instr.params.empty()) {
         instructionCounter++;
@@ -166,9 +174,7 @@ void OSProcess::executeSleep(const Instruction& instr) {
     if (ticks < 1) ticks = 1;
     if (ticks > 255) ticks = 255;
     
-    // CRITICAL FIX: Increment instruction counter BEFORE going to sleep
     instructionCounter++;
-    
     setWaitTicks(ticks);
     currentState = WAITING;
     isWaitingState = true;
@@ -204,6 +210,61 @@ void OSProcess::executeFor(const Instruction& instr) {
     logOutput("[FOR] Starting loop with " + std::to_string(repeatCount) + " iterations");
 }
 
+void OSProcess::executeRead(const Instruction& instr) {
+    if (instr.params.size() < 2) return;
+    
+    std::string varName = instr.params[0];
+    std::string addressStr = instr.params[1];
+    
+    uint32_t address = parseHexAddress(addressStr);
+    if (address == 0xFFFFFFFF) {
+        logOutput("[ERROR] Invalid address format: " + addressStr);
+        return;
+    }
+    
+    uint16_t value = 0;
+    if (memoryManager) {
+        if (memoryManager->readMemory(address, value, shared_from_this())) {
+            symbolTable.setValue(varName, value);
+            logOutput("[READ] " + varName + " = " + std::to_string(value) + " from 0x" + 
+                     toHexString(address));
+        } else {
+            logOutput("[ERROR] Memory access violation at 0x" + toHexString(address));
+            currentState = FINISHED;
+            setViolationAddress(address);
+        }
+    } else {
+        logOutput("[ERROR] Memory manager not available");
+    }
+}
+
+void OSProcess::executeWrite(const Instruction& instr) {
+    if (instr.params.size() < 2) return;
+    
+    std::string addressStr = instr.params[0];
+    std::string valueStr = instr.params[1];
+    
+    uint32_t address = parseHexAddress(addressStr);
+    if (address == 0xFFFFFFFF) {
+        logOutput("[ERROR] Invalid address format: " + addressStr);
+        return;
+    }
+    
+    uint16_t value = parseValue(valueStr);
+    
+    if (memoryManager) {
+        if (memoryManager->writeMemory(address, value, shared_from_this())) {
+            logOutput("[WRITE] 0x" + toHexString(address) + " = " + std::to_string(value));
+        } else {
+            logOutput("[ERROR] Memory access violation at 0x" + toHexString(address));
+            currentState = FINISHED;
+            setViolationAddress(address);
+        }
+    } else {
+        logOutput("[ERROR] Memory manager not available");
+    }
+}
+
 uint16_t OSProcess::getVariableValue(const std::string& name) {
     if (!symbolTable.hasValue(name)) {
         symbolTable.setValue(name, 0);
@@ -232,6 +293,25 @@ uint16_t OSProcess::parseValue(const std::string& token) {
         return static_cast<uint16_t>(val);
     } catch (...) {
         return 0;
+    }
+}
+
+std::string OSProcess::toHexString(uint32_t value) const {
+    std::stringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << value;
+    return ss.str();
+}
+
+uint32_t OSProcess::parseHexAddress(const std::string& str) const {
+    std::string clean = str;
+    if (clean.size() >= 2 && clean[0] == '0' && (clean[1] == 'x' || clean[1] == 'X')) {
+        clean = clean.substr(2);
+    }
+    clean.erase(std::remove_if(clean.begin(), clean.end(), ::isspace), clean.end());
+    try {
+        return std::stoul(clean, nullptr, 16);
+    } catch (...) {
+        return 0xFFFFFFFF;
     }
 }
 
@@ -286,3 +366,18 @@ void OSProcess::decrementWaitTicks() {
 
 bool OSProcess::isWaiting() const { return isWaitingState; }
 int OSProcess::getWaitTicks() const { return waitTicks; }
+
+void OSProcess::setViolationAddress(uint32_t address) {
+    violationAddress = address;
+    violationTime = std::chrono::system_clock::now();
+    hasViolation = true;
+}
+
+std::string OSProcess::getViolationTimeString() const {
+    if (!hasViolation) return "N/A";
+    auto time_t = std::chrono::system_clock::to_time_t(violationTime);
+    std::tm tm = *std::localtime(&time_t);
+    std::stringstream ss;
+    ss << std::put_time(&tm, "%H:%M:%S");
+    return ss.str();
+}
