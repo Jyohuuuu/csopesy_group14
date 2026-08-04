@@ -41,10 +41,11 @@ bool MemoryManager::allocateMemory(std::shared_ptr<OSProcess> process) {
     
     int neededFrames = calculateNumPages(process->getMemorySize());
     
-    int freeFrames = 0;
-    for (const auto& frame : physicalMemory) {
-        if (!frame.occupied) freeFrames++;
+    int reservedFrames = 0;
+    for (const auto& [name, table] : pageTables) {
+        reservedFrames += static_cast<int>(table.size());
     }
+    int freeFrames = numFrames - reservedFrames;
     
     if (freeFrames < neededFrames) {
         return false;
@@ -52,32 +53,13 @@ bool MemoryManager::allocateMemory(std::shared_ptr<OSProcess> process) {
     
     std::vector<PageTableEntry> pageTable;
     for (int i = 0; i < neededFrames; i++) {
-        int frameIndex = findFreeFrame();
-        if (frameIndex == -1) {
-            for (const auto& entry : pageTable) {
-                if (entry.valid && entry.frameIndex >= 0) {
-                    physicalMemory[entry.frameIndex].occupied = false;
-                    physicalMemory[entry.frameIndex].ownerProcess = "";
-                    physicalMemory[entry.frameIndex].virtualPageNum = -1;
-                    std::fill(physicalMemory[entry.frameIndex].data.begin(), 
-                             physicalMemory[entry.frameIndex].data.end(), 0);
-                }
-            }
-            return false;
-        }
-        
-        physicalMemory[frameIndex].occupied = true;
-        physicalMemory[frameIndex].ownerProcess = process->getName();
-        physicalMemory[frameIndex].virtualPageNum = i;
-        
         PageTableEntry entry;
-        entry.valid = true;
-        entry.frameIndex = frameIndex;
+        entry.valid = false;
+        entry.frameIndex = -1;
         entry.virtualPageNum = i;
         entry.processName = process->getName();
         entry.referenced = false;
         entry.modified = false;
-        
         pageTable.push_back(entry);
     }
     
@@ -95,6 +77,16 @@ void MemoryManager::releaseMemory(std::shared_ptr<OSProcess> process) {
     if (it != pageTables.end()) {
         for (const auto& entry : it->second) {
             if (entry.valid && entry.frameIndex >= 0 && entry.frameIndex < numFrames) {
+                bool hasData = false;
+                for (uint8_t byte : physicalMemory[entry.frameIndex].data) {
+                    if (byte != 0) { hasData = true; break; }
+                }
+                
+                if (hasData) {
+                    savePageToBackingStore(process->getName(), entry.virtualPageNum);
+                    pagesPagedOut++;
+                }
+                
                 physicalMemory[entry.frameIndex].occupied = false;
                 physicalMemory[entry.frameIndex].ownerProcess = "";
                 physicalMemory[entry.frameIndex].virtualPageNum = -1;

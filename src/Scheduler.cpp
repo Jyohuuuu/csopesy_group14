@@ -307,17 +307,23 @@ void Scheduler::workerThread(int coreId) {
                 
                 if (schedulerAlgorithm == "rr" && quantumCounterLocal >= quantumCycles && !process->isFinished()) {
                     process->setState(OSProcess::READY);
-                    {
-                        std::lock_guard<std::mutex> lock(queueMutex);
-                        readyQueue.push(process);
-                        cv.notify_one();
-                    }
-                    {
-                        std::lock_guard<std::mutex> lock(processMutex);
-                        runningProcesses[coreId] = nullptr;
-                    }
-                    break;
+                {
+                    std::lock_guard<std::mutex> lock(processMutex);
+                    memoryManager->releaseMemory(process);
+                    process->setHasMemory(false);
                 }
+    
+                {
+                    std::lock_guard<std::mutex> lock(queueMutex);
+                    memoryWaitQueue.push(process);
+                    cv.notify_one();
+                }
+                {
+                    std::lock_guard<std::mutex> lock(processMutex);
+                    runningProcesses[coreId] = nullptr;
+                }
+    break;
+}
                 
             } catch (const std::exception& e) {
                 std::cerr << "[ERROR] Exception in worker " << coreId << ": " << e.what() << "\n";
